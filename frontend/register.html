@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký - ROOMI</title>
+    <meta name="description" content="Đăng ký tài khoản ROOMI.">
+    <link rel="stylesheet" href="assets/css/styles.css">
+  </head>
+  <body class="auth-page" data-page="register">
+    <main>
+      <a class="auth-logo" href="index.html">
+        <img src="assets/images/figma/logo-roomi-footer.png" alt="ROOMI">
+      </a>
+      <section class="auth-card reveal">
+        <h1>Đăng ký</h1>
+        <form class="auth-form" data-auth-form>
+          <input class="roomi-input" type="text" autocomplete="name" placeholder="Họ và tên" required>
+          <input class="roomi-input" type="email" autocomplete="email" placeholder="Email" required>
+          <input class="roomi-input" type="password" autocomplete="new-password" placeholder="Mật khẩu" required>
+          <div class="auth-actions">
+            <button class="btn btn-cream" type="submit">Tạo tài khoản</button>
+            <a href="login.html">Đã có tài khoản? Đăng nhập</a>
+            <p data-auth-notice></p>
+          </div>
+        </form>
+      </section>
+    </main>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script type="module" src="assets/js/auth.js?v=nav-public-1"></script>
+  </body>
+</html>

@@ -36,17 +36,26 @@ const normalizePagePath = (value = '') =>
     .trim()
     .toLowerCase();
 
-const register = async ({ name, email, password }) => {
+const register = async ({ name, email, phone, password }) => {
   const existingUser = await usersRepository.findByEmail(email);
 
   if (existingUser) {
     throw new AppError('Email already exists', 409);
   }
 
+  if (phone) {
+    const existingPhone = await usersRepository.findByPhone(phone);
+
+    if (existingPhone) {
+      throw new AppError('Phone already exists', 409);
+    }
+  }
+
   const hashedPassword = await bcrypt.hash(password, config.bcryptSaltRounds);
   const user = await usersRepository.create({
     name,
     email,
+    phone,
     password: hashedPassword,
   });
 

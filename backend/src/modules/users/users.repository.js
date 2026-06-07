@@ -4,6 +4,7 @@ const safeUserSelect = {
   id: true,
   name: true,
   email: true,
+  phone: true,
   role: true,
   createdAt: true,
   updatedAt: true,
@@ -62,19 +63,26 @@ const findByEmail = (email, { withPassword = false } = {}) =>
     select: withPassword ? userWithPasswordSelect : safeUserSelect,
   });
 
+const findByPhone = (phone) =>
+  prisma.user.findUnique({
+    where: { phone },
+    select: safeUserSelect,
+  });
+
 const findByEmailOrName = (identifier, { withPassword = false } = {}) =>
   prisma.user.findFirst({
     where: {
-      OR: [{ email: identifier }, { name: identifier }],
+      OR: [{ email: identifier }, { name: identifier }, { phone: identifier }],
     },
     select: withPassword ? userWithPasswordSelect : safeUserSelect,
   });
 
-const create = ({ name, email, password }) =>
+const create = ({ name, email, phone, password }) =>
   prisma.user.create({
     data: {
       name,
       email,
+      phone,
       password,
     },
     select: safeUserSelect,
@@ -99,6 +107,7 @@ module.exports = {
   findByEmail,
   findByEmailOrName,
   findById,
+  findByPhone,
   remove,
   update,
 };

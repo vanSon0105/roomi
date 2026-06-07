@@ -17,14 +17,46 @@ cp .env.example .env
 npm install
 npm run prisma:generate
 npm run prisma:migrate
+npm run prisma:seed
 npm run dev
 ```
 
 Update `.env` before running Prisma:
 
 ```txt
-DATABASE_URL="mysql://root:password@localhost:3306/chithuy"
+DATABASE_URL="mysql://root:123456@localhost:3306/chithuy"
 JWT_SECRET="change-this-secret"
+```
+
+Local database used in development:
+
+```txt
+Database: chithuy
+Host: localhost
+Port: 3306
+User: root
+Password: 123456
+```
+
+Seed creates the first admin account and base categories:
+
+```txt
+Email: admin@roomi.com.vn
+Password: Admin@123456
+```
+
+Main tables:
+
+```txt
+users
+categories
+products
+product_images
+carts
+cart_items
+addresses
+orders
+order_items
 ```
 
 ## API

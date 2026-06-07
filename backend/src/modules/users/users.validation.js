@@ -19,6 +19,7 @@ const updateUserSchema = userIdParamSchema.extend({
     .object({
       name: z.string().trim().min(2).max(100).optional(),
       email: z.string().trim().email().max(255).toLowerCase().optional(),
+      phone: z.string().trim().min(8).max(20).optional(),
       password: z.string().min(6).max(72).optional(),
     })
     .refine((data) => Object.keys(data).length > 0, {

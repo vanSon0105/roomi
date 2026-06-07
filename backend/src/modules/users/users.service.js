@@ -33,6 +33,14 @@ const updateUser = async (id, data) => {
     }
   }
 
+  if (data.phone && data.phone !== existingUser.phone) {
+    const userWithPhone = await usersRepository.findByPhone(data.phone);
+
+    if (userWithPhone) {
+      throw new AppError('Phone already exists', 409);
+    }
+  }
+
   const updateData = { ...data };
 
   if (updateData.password) {

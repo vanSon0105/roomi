@@ -18,7 +18,9 @@ form?.addEventListener('submit', (event) => {
   const safeRedirect = redirect && !redirect.includes('://') && !redirect.startsWith('//') ? redirect : 'index.html';
 
   if (notice) {
-    notice.textContent = 'Đăng nhập thành công, đang chuyển trang...';
+    notice.textContent = document.body.dataset.page === 'register'
+      ? 'Đăng ký thành công, đang chuyển trang...'
+      : 'Đăng nhập thành công, đang chuyển trang...';
   }
 
   window.location.href = safeRedirect;

@@ -884,39 +884,81 @@ button {
 
 .auth-page {
   min-height: 100dvh;
-  padding: 32px 20px 70px;
+  padding: 22px 0 78px;
   background: var(--cream);
+  color: var(--maroon);
+  font-family: var(--copy);
+}
+
+.auth-page[data-page="login"],
+.auth-page[data-page="register"] {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  padding: clamp(10px, 2dvh, 22px) 0 clamp(12px, 2dvh, 24px);
+}
+
+.auth-page[data-page="register"] {
+  padding: clamp(8px, 1.4dvh, 18px) 0 clamp(8px, 1.4dvh, 18px);
+}
+
+.auth-page[data-page="login"] main,
+.auth-page[data-page="register"] main {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .auth-logo {
   display: block;
-  width: 260px;
-  margin-inline: auto;
+  width: clamp(138px, 10vw, 190px);
+  margin: 0 0 0 clamp(32px, 8.8vw, 180px);
 }
 
 .auth-card {
-  width: min(100%, 1220px);
-  margin: 52px auto 0;
-  padding: clamp(52px, 7vw, 90px) clamp(24px, 8vw, 110px);
-  border-radius: 86px;
+  width: min(calc(100% - clamp(40px, 23vw, 470px)), 1580px);
+  margin: clamp(50px, 3.15vw, 64px) auto 0;
+  padding: clamp(50px, 3.2vw, 66px) clamp(24px, 6vw, 116px) clamp(48px, 4.8vw, 78px);
+  border-radius: clamp(48px, 5.7vw, 116px);
   background: var(--maroon);
   color: var(--cream);
+}
+
+.auth-card-login {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-top: clamp(14px, 3dvh, 52px);
+  display: grid;
+  align-content: center;
+}
+
+.auth-card-register {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-top: clamp(10px, 2dvh, 42px);
+  display: grid;
+  align-content: center;
 }
 
 .auth-card h1 {
   margin: 0;
   text-align: center;
   font-family: var(--display);
-  font-size: clamp(4rem, 9vw, 7.3rem);
-  font-weight: 600;
-  line-height: 0.9;
+  font-size: clamp(4.6rem, 5.2vw, 6.7rem);
+  font-weight: 100;
+  line-height: 0.88;
 }
 
 .auth-form {
-  width: min(100%, 690px);
-  margin: 54px auto 0;
+  width: min(100%, 840px);
+  margin: clamp(44px, 2.85vw, 58px) auto 0;
   display: grid;
-  gap: 28px;
+  gap: clamp(34px, 2.65vw, 54px);
+}
+
+.auth-form-register {
+  margin-top: clamp(38px, 2.25vw, 46px);
+  gap: clamp(32px, 2.35vw, 48px);
 }
 
 .roomi-input {
@@ -936,14 +978,113 @@ button {
   color: rgba(80, 0, 0, 0.35);
 }
 
+.auth-form .roomi-input {
+  height: clamp(62px, 3.8vw, 78px);
+  border-radius: 10px;
+  padding: 0 28px;
+  color: var(--maroon);
+  font-family: var(--copy);
+  font-size: clamp(1.65rem, 1.7vw, 2.25rem);
+  font-weight: 400;
+}
+
+.auth-form .roomi-input::placeholder {
+  color: rgba(38, 36, 36, 0.28);
+}
+
+.auth-forgot {
+  justify-self: end;
+  margin: clamp(-38px, -2vw, -24px) 8px 0 0;
+  color: var(--cream);
+  font-family: var(--copy);
+  font-size: clamp(1.55rem, 1.55vw, 2rem);
+  font-weight: 400;
+  line-height: 1;
+  transition: transform 500ms var(--fluid), opacity 500ms var(--fluid);
+}
+
+.auth-forgot:hover {
+  transform: translateY(-2px);
+  opacity: 0.86;
+}
+
 .auth-actions {
-  margin-top: 38px;
+  margin-top: -6px;
   display: grid;
   justify-items: center;
-  gap: 24px;
+  gap: clamp(22px, 2.2vw, 34px);
   text-align: center;
-  font-size: 24px;
-  font-weight: 800;
+  font-family: var(--copy);
+}
+
+.auth-actions .btn {
+  min-width: clamp(218px, 14.8vw, 300px);
+  min-height: clamp(58px, 3.8vw, 78px);
+  border-radius: 10px;
+  font-size: clamp(1.55rem, 1.55vw, 2rem);
+  font-weight: 600;
+}
+
+.auth-switch,
+.auth-notice {
+  margin: 0;
+  color: var(--cream);
+  font-size: clamp(1.45rem, 1.5vw, 1.95rem);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.auth-switch a {
+  margin-left: 8px;
+  font-weight: 700;
+}
+
+.auth-notice {
+  min-height: 1.2em;
+  font-size: clamp(1rem, 1.1vw, 1.35rem);
+  opacity: 0.82;
+}
+
+.auth-page[data-page="register"] .auth-logo {
+  width: clamp(118px, 8.8vw, 176px);
+}
+
+.auth-page[data-page="register"] .auth-card-register {
+  padding-top: clamp(24px, 3.3dvh, 58px);
+  padding-bottom: clamp(24px, 3.4dvh, 62px);
+}
+
+.auth-page[data-page="register"] .auth-card h1 {
+  font-size: clamp(3.8rem, 8dvh, 6.2rem);
+}
+
+.auth-page[data-page="register"] .auth-form-register {
+  margin-top: clamp(20px, 3dvh, 44px);
+  gap: clamp(16px, 2.45dvh, 36px);
+}
+
+.auth-page[data-page="register"] .auth-form .roomi-input {
+  height: clamp(44px, 6.7dvh, 72px);
+  font-size: clamp(1rem, 2.45dvh, 2rem);
+}
+
+.auth-page[data-page="register"] .auth-actions {
+  gap: clamp(12px, 2dvh, 22px);
+  margin-top: clamp(-8px, -0.6dvh, 0px);
+}
+
+.auth-page[data-page="register"] .auth-actions .btn {
+  min-height: clamp(44px, 6.5dvh, 66px);
+  font-size: clamp(1.08rem, 2.35dvh, 1.75rem);
+}
+
+.auth-page[data-page="register"] .auth-switch {
+  font-size: clamp(1rem, 2.25dvh, 1.55rem);
+}
+
+.auth-page[data-page="register"] .auth-notice {
+  min-height: 0;
+  font-size: clamp(0.9rem, 1.7dvh, 1.1rem);
 }
 
 .detail-grid {
@@ -2200,12 +2341,106 @@ button {
   }
 
   .auth-card {
+    width: min(100% - 28px, 560px);
+    min-height: auto;
+    padding: 38px 18px 34px;
     border-radius: 42px;
   }
 
+  .auth-page {
+    padding: 18px 0 42px;
+  }
+
+  .auth-logo {
+    width: 122px;
+    margin-left: 18px;
+  }
+
+  .auth-card h1 {
+    font-size: clamp(3.9rem, 18vw, 5.2rem);
+  }
+
+  .auth-form,
+  .auth-form-register {
+    margin-top: 34px;
+    gap: 24px;
+  }
+
+  .auth-form .roomi-input,
   .roomi-input {
     height: 58px;
     font-size: 18px;
+  }
+
+  .auth-forgot {
+    margin-top: -12px;
+    font-size: 1.16rem;
+  }
+
+  .auth-actions {
+    margin-top: 2px;
+    gap: 20px;
+  }
+
+  .auth-actions .btn {
+    min-width: 172px;
+    min-height: 54px;
+    font-size: 1.22rem;
+  }
+
+  .auth-switch {
+    font-size: 1.13rem;
+  }
+
+  .auth-page[data-page="login"],
+  .auth-page[data-page="register"] {
+    height: 100dvh;
+    overflow: hidden;
+    padding: 12px 0;
+  }
+
+  .auth-page[data-page="login"] .auth-card-login,
+  .auth-page[data-page="register"] .auth-card-register {
+    width: calc(100vw - 28px);
+    max-width: calc(100vw - 28px);
+    margin-left: auto;
+    margin-right: auto;
+    overflow: hidden;
+  }
+
+  .auth-page[data-page="register"] .auth-card-register {
+    padding: clamp(20px, 4dvh, 32px) 16px;
+    border-radius: 34px;
+  }
+
+  .auth-page[data-page="register"] .auth-card h1 {
+    font-size: clamp(3.1rem, 12dvh, 4.5rem);
+  }
+
+  .auth-page[data-page="register"] .auth-form-register {
+    width: 100%;
+    min-width: 0;
+    margin-top: clamp(14px, 2.8dvh, 24px);
+    gap: clamp(12px, 2.2dvh, 18px);
+  }
+
+  .auth-page[data-page="register"] .auth-form .roomi-input {
+    height: clamp(42px, 6.2dvh, 50px);
+    padding-inline: 18px;
+    font-size: 16px;
+  }
+
+  .auth-page[data-page="register"] .auth-actions {
+    gap: clamp(10px, 1.8dvh, 14px);
+  }
+
+  .auth-page[data-page="register"] .auth-actions .btn {
+    min-height: clamp(42px, 6.2dvh, 50px);
+    font-size: 1.08rem;
+  }
+
+  .auth-page[data-page="register"] .auth-switch {
+    font-size: 0.98rem;
   }
 
   .detail-actions,
@@ -2231,6 +2466,57 @@ button {
   .chat-panel {
     right: 14px;
     bottom: 88px;
+  }
+}
+
+@media (max-height: 820px) {
+  .auth-page[data-page="login"] .auth-logo {
+    width: clamp(104px, 17dvh, 150px);
+  }
+
+  .auth-page[data-page="login"] .auth-card-login {
+    margin-top: clamp(10px, 2dvh, 24px);
+    padding-top: clamp(22px, 3.6dvh, 38px);
+    padding-bottom: clamp(22px, 3.6dvh, 38px);
+    border-radius: clamp(38px, 8dvh, 78px);
+  }
+
+  .auth-page[data-page="login"] .auth-card h1 {
+    font-size: clamp(3.5rem, 9.6dvh, 5.1rem);
+  }
+
+  .auth-page[data-page="login"] .auth-form-login {
+    margin-top: clamp(20px, 3.2dvh, 34px);
+    gap: clamp(18px, 3dvh, 30px);
+  }
+
+  .auth-page[data-page="login"] .auth-form .roomi-input {
+    height: clamp(48px, 7.2dvh, 62px);
+    font-size: clamp(1.12rem, 2.8dvh, 1.55rem);
+  }
+
+  .auth-page[data-page="login"] .auth-forgot {
+    margin-top: clamp(-16px, -1.6dvh, -8px);
+    font-size: clamp(1rem, 2.35dvh, 1.35rem);
+  }
+
+  .auth-page[data-page="login"] .auth-actions {
+    gap: clamp(12px, 2.1dvh, 18px);
+    margin-top: 0;
+  }
+
+  .auth-page[data-page="login"] .auth-actions .btn {
+    min-height: clamp(44px, 6.7dvh, 56px);
+    font-size: clamp(1.08rem, 2.55dvh, 1.42rem);
+  }
+
+  .auth-page[data-page="login"] .auth-switch {
+    font-size: clamp(1rem, 2.25dvh, 1.28rem);
+  }
+
+  .auth-page[data-page="login"] .auth-notice {
+    min-height: 0;
+    font-size: 0.95rem;
   }
 }
 

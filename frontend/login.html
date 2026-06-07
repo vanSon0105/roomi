@@ -12,15 +12,16 @@
       <a class="auth-logo" href="index.html">
         <img src="assets/images/figma/logo-roomi-footer.png" alt="ROOMI">
       </a>
-      <section class="auth-card reveal">
+      <section class="auth-card auth-card-login">
         <h1>Đăng nhập</h1>
-        <form class="auth-form" data-auth-form>
-          <input class="roomi-input" type="email" autocomplete="email" placeholder="Email" required>
+        <form class="auth-form auth-form-login" data-auth-form>
+          <input class="roomi-input" type="text" autocomplete="username" placeholder="Tên đăng nhập" required>
           <input class="roomi-input" type="password" autocomplete="current-password" placeholder="Mật khẩu" required>
+          <a class="auth-forgot" href="#">Quên mật khẩu?</a>
           <div class="auth-actions">
             <button class="btn btn-cream" type="submit">Đăng nhập</button>
-            <a href="register.html">Chưa có tài khoản? Đăng ký</a>
-            <p data-auth-notice></p>
+            <p class="auth-switch">Bạn chưa có tài khoản? <a href="register.html">Đăng kí</a></p>
+            <p class="auth-notice" data-auth-notice></p>
           </div>
         </form>
       </section>

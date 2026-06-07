@@ -77,7 +77,7 @@ export function renderShell(page = '') {
       <footer class="site-footer">
         <div class="footer-inner">
           <div class="footer-logo">
-            <a href="#homePage">
+            <a href="index.html">
               <img src="${rootPrefix}assets/images/figma/logo-roomi-footer.png" alt="ROOMI">
             </a>
           </div>

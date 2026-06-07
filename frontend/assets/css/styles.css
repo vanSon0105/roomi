@@ -168,8 +168,33 @@ button {
 }
 
 .nav-icon {
-  font-size: 30px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
   line-height: 1;
+}
+
+.nav-icon img,
+.nav-account-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.nav-account.is-authenticated {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.nav-account-icon[hidden] {
+  display: none;
 }
 
 .menu-trigger {
@@ -406,6 +431,12 @@ button {
   text-align: center;
 }
 
+.section-kicker {
+  letter-spacing: 6px;
+  font-size: 22px;
+  font-weight: 500;
+  text-align: center;
+}
 .section-title::before,
 .section-title::after {
   content: "";
@@ -419,7 +450,7 @@ button {
   flex: none;
   margin: 0;
   font-family: var(--display);
-  font-size: clamp(4rem, 10vw, 7.4rem);
+  font-size: clamp(4rem, 10vw, 7.2rem);
   font-weight: 300;
   line-height: 0.88;
 }
@@ -582,6 +613,15 @@ button {
   gap: 86px 64px;
 }
 
+.empty-copy {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin: 0;
+  color: var(--maroon);
+  font-size: clamp(1.1rem, 1.5vw, 1.45rem);
+  text-align: center;
+}
+
 .product-card {
   display: block;
   opacity: 0;
@@ -598,10 +638,17 @@ button {
 .product-art {
   aspect-ratio: 1;
   overflow: hidden;
-  border-radius: 26px;
+  /* border-radius: 26px;
   background: linear-gradient(145deg, rgba(200, 176, 168, 0.35), rgba(255, 248, 248, 0.8));
-  box-shadow: 0 16px 28px rgba(80, 0, 0, 0.16);
+  box-shadow: 0 16px 28px rgba(80, 0, 0, 0.16); */
   transition: transform 700ms var(--fluid);
+}
+
+.product-art img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .product-card:hover .product-art {
@@ -1095,9 +1142,9 @@ button {
   padding-block: clamp(70px, 9vw, 130px);
 }
 
-.detail-media {
+/* .detail-media {
   box-shadow: var(--soft-shadow);
-}
+} */
 
 .detail-copy h1 {
   margin: 0;
@@ -1202,7 +1249,15 @@ button {
   width: 92px;
   height: 92px;
   border-radius: 8px;
+  overflow: hidden;
   background: linear-gradient(145deg, rgba(200, 176, 168, 0.55), rgba(255, 248, 248, 0.9));
+}
+
+.mini-art img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .qty {

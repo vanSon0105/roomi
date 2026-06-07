@@ -1,10 +1,10 @@
-import { categories, products } from './data.js';
-import { observeReveal, productCard, renderShell } from './common.js?v=nav-public-1';
+import { apiFetch, escapeHtml, observeReveal, productCard, renderShell } from './common.js?v=nav-public-1';
 
 renderShell('products');
 
 const pillRoot = document.querySelector('#categoryPills');
 const grid = document.querySelector('#productsGrid');
+let categories = [{ id: 'all', label: 'Tất cả sản phẩm' }];
 let activeCategory = 'all';
 
 function renderPills() {
@@ -13,34 +13,84 @@ function renderPills() {
   pillRoot.innerHTML = categories
     .map(
       (category) => `
-        <button class="${category.id === activeCategory ? 'is-active' : ''}" type="button" data-category="${category.id}">
-          ${category.label}
+        <button class="${category.id === activeCategory ? 'is-active' : ''}" type="button" data-category="${escapeHtml(category.id)}">
+          ${escapeHtml(category.label)}
         </button>
       `,
     )
     .join('');
 }
 
-function renderProducts() {
+function renderLoading() {
+  if (!grid) return;
+  grid.innerHTML = '<p class="empty-copy">Đang tải sản phẩm...</p>';
+}
+
+function renderError(error) {
+  if (!grid) return;
+  grid.innerHTML = `<p class="empty-copy">${escapeHtml(error.message || 'Không tải được sản phẩm.')}</p>`;
+}
+
+function renderProducts(products) {
   if (!grid) return;
 
-  const visible =
-    activeCategory === 'all'
-      ? products
-      : products.filter((product) => product.category === activeCategory);
+  if (products.length === 0) {
+    grid.innerHTML = '<p class="empty-copy">Chưa có sản phẩm trong danh mục này.</p>';
+    return;
+  }
 
-  grid.innerHTML = visible.map(productCard).join('');
+  grid.innerHTML = products.map(productCard).join('');
   observeReveal();
 }
 
-pillRoot?.addEventListener('click', (event) => {
+async function loadProducts() {
+  renderLoading();
+
+  const query = new URLSearchParams({
+    limit: '100',
+  });
+
+  if (activeCategory !== 'all') {
+    query.set('category', activeCategory);
+  }
+
+  const response = await apiFetch(`/products?${query.toString()}`);
+  renderProducts(response.data.items);
+}
+
+async function init() {
+  try {
+    const [categoryResponse] = await Promise.all([
+      apiFetch('/categories'),
+    ]);
+
+    categories = [
+      { id: 'all', label: 'Tất cả sản phẩm' },
+      ...categoryResponse.data.map((category) => ({
+        id: category.slug,
+        label: category.label,
+      })),
+    ];
+
+    renderPills();
+    await loadProducts();
+  } catch (error) {
+    renderError(error);
+  }
+}
+
+pillRoot?.addEventListener('click', async (event) => {
   const button = event.target.closest('[data-category]');
-  if (!button) return;
+  if (!button || button.dataset.category === activeCategory) return;
 
   activeCategory = button.dataset.category;
   renderPills();
-  renderProducts();
+
+  try {
+    await loadProducts();
+  } catch (error) {
+    renderError(error);
+  }
 });
 
-renderPills();
-renderProducts();
+init();

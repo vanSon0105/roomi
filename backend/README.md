@@ -59,6 +59,31 @@ orders
 order_items
 ```
 
+Product data and images:
+
+```bash
+npm run products:images
+npm run prisma:seed
+```
+
+Or run both:
+
+```bash
+npm run products:import
+```
+
+Product images are synced from:
+
+```txt
+frontend/assets/images/figma/products
+```
+
+to:
+
+```txt
+frontend/assets/images/products
+```
+
 ## API
 
 Base URL:
@@ -96,6 +121,25 @@ POST /auth/login
 POST /auth/logout
 GET /auth/me
 GET /auth/page-access?path=cart.html
+```
+
+Products:
+
+```txt
+GET /categories
+GET /products
+GET /products?category=nen-thom&limit=30
+GET /products/:slug
+GET /products/:slug/related
+```
+
+Cart:
+
+```txt
+GET /cart
+POST /cart/items
+PATCH /cart/items/:itemId
+DELETE /cart/items/:itemId
 ```
 
 Users:

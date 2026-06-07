@@ -1,4 +1,4 @@
-import { categoryLabel, formatCurrency } from './data.js';
+import { formatCurrency } from './data.js';
 
 export const API_BASE =
   window.ROOMI_API_BASE ||
@@ -7,6 +7,8 @@ export const API_BASE =
     : 'http://localhost:4000/api');
 
 const rootPrefix = '';
+const cartIconSrc = `${rootPrefix}assets/images/cart-icon.png`;
+const userIconSrc = `${rootPrefix}assets/images/user-icon.png`;
 
 function active(page, id) {
   return page === id ? 'is-active' : '';
@@ -33,20 +35,57 @@ export async function apiFetch(path, options = {}) {
   const payload = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new Error(payload?.message || 'Request failed');
+    const error = new Error(payload?.message || 'Request failed');
+    error.status = response.status;
+    error.data = payload?.data || null;
+    throw error;
   }
 
   return payload;
+}
+
+export function escapeHtml(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+export function redirectToLogin() {
+  const currentPage = `${window.location.pathname.split('/').pop() || 'index.html'}${window.location.search}`;
+  window.location.href = `login.html?redirect=${encodeURIComponent(currentPage)}`;
+}
+
+export function mediaUrl(path) {
+  if (!path) {
+    return '';
+  }
+
+  if (/^(https?:|data:|blob:)/.test(path)) {
+    return path;
+  }
+
+  return `${rootPrefix}${path.replace(/^\/+/, '')}`;
 }
 
 export function renderShell(page = '') {
   const headerSlot = document.querySelector('[data-header]');
   const footerSlot = document.querySelector('[data-footer]');
   const chatSlot = document.querySelector('[data-chat]');
-  const isAuthRequiredPage = document.body.dataset.authRequired === 'true';
-  const accountDesktopLink = isAuthRequiredPage
-    ? `<a class="${active(page, 'login')}" href="login.html">Đăng nhập</a>`
-    : `<a class="nav-icon ${active(page, 'login')}" href="login.html" aria-label="Tài khoản"><i class="ph-fill ph-user-square"></i></a>`;
+  const accountDesktopLink = `
+    <a class="nav-account ${active(page, 'login')}" href="login.html" data-account-link>
+      <span data-account-text>Đăng nhập</span>
+      <img class="nav-account-icon" src="${userIconSrc}" alt="" data-account-icon hidden>
+    </a>
+  `;
+  const accountMobileLink = `<a style="--delay:400ms" class="${active(page, 'login')}" href="login.html" data-mobile-account-link>Đăng nhập</a>`;
+  const cartDesktopLink = `
+    <a class="nav-icon nav-cart ${active(page, 'cart')}" href="cart.html" aria-label="Giỏ hàng">
+      <img src="${cartIconSrc}" alt="">
+    </a>
+  `;
 
   if (headerSlot) {
     headerSlot.innerHTML = `
@@ -63,7 +102,7 @@ export function renderShell(page = '') {
             <a class="${active(page, 'products')}" href="products.html">Sản phẩm</a>
             <a class="${active(page, 'about')}" href="about.html">Về chúng tôi</a>
             <a class="${active(page, 'room-3d')}" href="room-3d.html">Mô phỏng 3D</a>
-            <a class="nav-icon ${active(page, 'cart')}" href="cart.html" aria-label="Giỏ hàng"><i class="ph-fill ph-shopping-cart-simple"></i></a>
+            ${cartDesktopLink}
             ${accountDesktopLink}
           </nav>
           <button class="menu-trigger" type="button" aria-label="Mở menu" data-menu-open>
@@ -80,7 +119,7 @@ export function renderShell(page = '') {
             <a style="--delay:190ms" class="${active(page, 'about')}" href="about.html">Về chúng tôi</a>
             <a style="--delay:260ms" class="${active(page, 'room-3d')}" href="room-3d.html">Mô phỏng 3D</a>
             <a style="--delay:330ms" class="${active(page, 'cart')}" href="cart.html">Giỏ hàng</a>
-            <a style="--delay:400ms" class="${active(page, 'login')}" href="login.html">Đăng nhập</a>
+            ${accountMobileLink}
           </nav>
         </aside>
       </header>
@@ -152,35 +191,102 @@ export function renderShell(page = '') {
   }
 
   bindCommonInteractions();
+  syncAccountState();
   observeReveal();
 }
 
-export function stars(rating) {
-  return Array.from({ length: 5 }, (_, index) => `<span class="${index < rating ? '' : 'off'}">★</span>`).join('');
+function markAuthenticatedAccount(user) {
+  const accountLabel = user?.email ? `Tài khoản ${user.email}` : 'Tài khoản';
+
+  document.querySelectorAll('[data-account-link]').forEach((link) => {
+    link.classList.add('is-authenticated');
+    link.href = '#';
+    link.setAttribute('aria-label', accountLabel);
+    link.setAttribute('title', accountLabel);
+    link.addEventListener('click', (event) => event.preventDefault());
+
+    const text = link.querySelector('[data-account-text]');
+    const icon = link.querySelector('[data-account-icon]');
+
+    if (text) {
+      text.textContent = '';
+    }
+
+    if (icon) {
+      icon.hidden = false;
+    }
+  });
+
+  document.querySelectorAll('[data-mobile-account-link]').forEach((link) => {
+    link.classList.add('is-authenticated');
+    link.href = '#';
+    link.textContent = 'Tài khoản';
+    link.setAttribute('aria-label', accountLabel);
+    link.addEventListener('click', (event) => event.preventDefault());
+  });
 }
 
-export function productArt(label = 'Ảnh sản phẩm') {
+async function syncAccountState() {
+  if (!document.querySelector('[data-account-link], [data-mobile-account-link]')) {
+    return;
+  }
+
+  try {
+    const payload = await apiFetch('/auth/me');
+    const user = payload?.data?.user;
+
+    if (user) {
+      markAuthenticatedAccount(user);
+    }
+  } catch (_error) {
+    // No session yet: keep the public login link.
+  }
+}
+
+export function stars(rating) {
+  const score = Math.round(Number(rating) || 0);
+  return Array.from({ length: 5 }, (_, index) => `<span class="${index < score ? '' : 'off'}">&#9733;</span>`).join('');
+}
+
+export function productArt(label = 'Ảnh sản phẩm', imageUrl = '') {
+  const safeLabel = escapeHtml(label);
+  const safeImageUrl = mediaUrl(imageUrl);
+
   return `
-    <div class="product-art" aria-label="${label}">
-      <div class="product-placeholder"></div>
+    <div class="product-art" aria-label="${safeLabel}">
+      ${
+        safeImageUrl
+          ? `<img src="${escapeHtml(safeImageUrl)}" alt="${safeLabel}" loading="lazy">`
+          : '<div class="product-placeholder"></div>'
+      }
     </div>
   `;
 }
 
-export function miniArt(label = 'Ảnh sản phẩm') {
-  return `<div class="mini-art" aria-label="${label}"></div>`;
+export function miniArt(label = 'Ảnh sản phẩm', imageUrl = '') {
+  const safeLabel = escapeHtml(label);
+  const safeImageUrl = mediaUrl(imageUrl);
+
+  return `
+    <div class="mini-art" aria-label="${safeLabel}">
+      ${safeImageUrl ? `<img src="${escapeHtml(safeImageUrl)}" alt="${safeLabel}" loading="lazy">` : ''}
+    </div>
+  `;
 }
 
 export function productCard(product, index = 0) {
+  const slug = product.slug || product.id;
+  const categoryText = product.categoryLabel || product.category || '';
+
   return `
-    <a class="product-card" style="--index:${index}" href="product-detail.html?id=${product.id}" aria-label="${product.name}">
-      ${productArt(product.name)}
+    <a class="product-card" style="--index:${index}" href="product-detail.html?id=${encodeURIComponent(slug)}" aria-label="${escapeHtml(product.name)}">
+      ${productArt(product.name, product.imageUrl)}
       <div class="product-info">
-        <h3>${product.name}</h3>
+        <h3>${escapeHtml(product.name)}</h3>
         <div class="stars">${stars(product.rating)}</div>
         <div class="product-meta">
           <strong>${formatCurrency(product.price)}</strong>
-          <span>${categoryLabel(product.category)}</span>
+          <span>${escapeHtml(categoryText)}</span>
         </div>
       </div>
     </a>

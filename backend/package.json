@@ -11,7 +11,9 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "node prisma/seed.js",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "products:images": "node prisma/sync-product-images.js",
+    "products:import": "npm run products:images && npm run prisma:seed"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

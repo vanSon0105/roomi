@@ -80,9 +80,11 @@ model Product {
   description      String?        @db.Text
   price            Decimal        @db.Decimal(12, 2)
   compareAtPrice   Decimal?       @db.Decimal(12, 2)
+  rating           Decimal        @default(0) @db.Decimal(2, 1)
   stock            Int            @default(0)
   status           ProductStatus  @default(ACTIVE)
   isFeatured       Boolean        @default(false)
+  suitableFor      String?        @db.Text
   category         Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   images           ProductImage[]
   cartItems        CartItem[]

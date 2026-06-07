@@ -8,9 +8,8 @@ CREATE TABLE `users` (
     `role` ENUM('USER', 'ADMIN') NOT NULL DEFAULT 'USER',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
-
-    UNIQUE INDEX `users_email_key`(`email`),
-    UNIQUE INDEX `users_phone_key`(`phone`),
+    UNIQUE INDEX `users_email_key` (`email`),
+    UNIQUE INDEX `users_phone_key` (`phone`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -23,9 +22,8 @@ CREATE TABLE `categories` (
     `description` TEXT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
-
-    UNIQUE INDEX `categories_slug_key`(`slug`),
-    INDEX `categories_parentId_idx`(`parentId`),
+    UNIQUE INDEX `categories_slug_key` (`slug`),
+    INDEX `categories_parentId_idx` (`parentId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -45,12 +43,11 @@ CREATE TABLE `products` (
     `isFeatured` BOOLEAN NOT NULL DEFAULT false,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
-
-    UNIQUE INDEX `products_slug_key`(`slug`),
-    UNIQUE INDEX `products_sku_key`(`sku`),
-    INDEX `products_categoryId_idx`(`categoryId`),
-    INDEX `products_status_idx`(`status`),
-    INDEX `products_isFeatured_idx`(`isFeatured`),
+    UNIQUE INDEX `products_slug_key` (`slug`),
+    UNIQUE INDEX `products_sku_key` (`sku`),
+    INDEX `products_categoryId_idx` (`categoryId`),
+    INDEX `products_status_idx` (`status`),
+    INDEX `products_isFeatured_idx` (`isFeatured`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -64,8 +61,7 @@ CREATE TABLE `product_images` (
     `isPrimary` BOOLEAN NOT NULL DEFAULT false,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
-
-    INDEX `product_images_productId_sortOrder_idx`(`productId`, `sortOrder`),
+    INDEX `product_images_productId_sortOrder_idx` (`productId`, `sortOrder`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -75,8 +71,7 @@ CREATE TABLE `carts` (
     `userId` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
-
-    UNIQUE INDEX `carts_userId_key`(`userId`),
+    UNIQUE INDEX `carts_userId_key` (`userId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -88,9 +83,8 @@ CREATE TABLE `cart_items` (
     `quantity` INTEGER NOT NULL DEFAULT 1,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
-
-    INDEX `cart_items_productId_idx`(`productId`),
-    UNIQUE INDEX `cart_items_cartId_productId_key`(`cartId`, `productId`),
+    INDEX `cart_items_productId_idx` (`productId`),
+    UNIQUE INDEX `cart_items_cartId_productId_key` (`cartId`, `productId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -109,8 +103,7 @@ CREATE TABLE `addresses` (
     `isDefault` BOOLEAN NOT NULL DEFAULT false,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
-
-    INDEX `addresses_userId_idx`(`userId`),
+    INDEX `addresses_userId_idx` (`userId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -128,9 +121,20 @@ CREATE TABLE `orders` (
     `shippingDistrict` VARCHAR(191) NULL,
     `shippingProvince` VARCHAR(191) NULL,
     `shippingCountry` VARCHAR(191) NOT NULL DEFAULT 'Việt Nam',
-    `status` ENUM('PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'COMPLETED', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
+    `status` ENUM(
+        'PENDING',
+        'CONFIRMED',
+        'PROCESSING',
+        'SHIPPED',
+        'COMPLETED',
+        'CANCELLED'
+    ) NOT NULL DEFAULT 'PENDING',
     `paymentStatus` ENUM('UNPAID', 'PAID', 'REFUNDED') NOT NULL DEFAULT 'UNPAID',
-    `paymentMethod` ENUM('COD', 'BANK_TRANSFER', 'ONLINE') NOT NULL DEFAULT 'COD',
+    `paymentMethod` ENUM(
+        'COD',
+        'BANK_TRANSFER',
+        'ONLINE'
+    ) NOT NULL DEFAULT 'COD',
     `subtotal` DECIMAL(12, 2) NOT NULL,
     `shippingFee` DECIMAL(12, 2) NOT NULL DEFAULT 0,
     `discountAmount` DECIMAL(12, 2) NOT NULL DEFAULT 0,
@@ -138,10 +142,9 @@ CREATE TABLE `orders` (
     `note` TEXT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
-
-    UNIQUE INDEX `orders_code_key`(`code`),
-    INDEX `orders_userId_status_idx`(`userId`, `status`),
-    INDEX `orders_shippingAddressId_idx`(`shippingAddressId`),
+    UNIQUE INDEX `orders_code_key` (`code`),
+    INDEX `orders_userId_status_idx` (`userId`, `status`),
+    INDEX `orders_shippingAddressId_idx` (`shippingAddressId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -157,41 +160,63 @@ CREATE TABLE `order_items` (
     `totalPrice` DECIMAL(12, 2) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
-
-    INDEX `order_items_orderId_idx`(`orderId`),
-    INDEX `order_items_productId_idx`(`productId`),
+    INDEX `order_items_orderId_idx` (`orderId`),
+    INDEX `order_items_productId_idx` (`productId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
-ALTER TABLE `categories` ADD CONSTRAINT `categories_parentId_fkey` FOREIGN KEY (`parentId`) REFERENCES `categories`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `categories`
+ADD CONSTRAINT `categories_parentId_fkey` FOREIGN KEY (`parentId`) REFERENCES `categories` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `products` ADD CONSTRAINT `products_categoryId_fkey` FOREIGN KEY (`categoryId`) REFERENCES `categories`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `products`
+ADD CONSTRAINT `products_categoryId_fkey` FOREIGN KEY (`categoryId`) REFERENCES `categories` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `product_images` ADD CONSTRAINT `product_images_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `product_images`
+ADD CONSTRAINT `product_images_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `carts` ADD CONSTRAINT `carts_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `carts`
+ADD CONSTRAINT `carts_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `cart_items` ADD CONSTRAINT `cart_items_cartId_fkey` FOREIGN KEY (`cartId`) REFERENCES `carts`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `cart_items`
+ADD CONSTRAINT `cart_items_cartId_fkey` FOREIGN KEY (`cartId`) REFERENCES `carts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `cart_items` ADD CONSTRAINT `cart_items_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `cart_items`
+ADD CONSTRAINT `cart_items_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `addresses` ADD CONSTRAINT `addresses_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `addresses`
+ADD CONSTRAINT `addresses_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `orders` ADD CONSTRAINT `orders_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `orders`
+ADD CONSTRAINT `orders_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `orders` ADD CONSTRAINT `orders_shippingAddressId_fkey` FOREIGN KEY (`shippingAddressId`) REFERENCES `addresses`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `orders`
+ADD CONSTRAINT `orders_shippingAddressId_fkey` FOREIGN KEY (`shippingAddressId`) REFERENCES `addresses` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `order_items` ADD CONSTRAINT `order_items_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `orders`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `order_items`
+ADD CONSTRAINT `order_items_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `orders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `order_items` ADD CONSTRAINT `order_items_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `order_items`
+ADD CONSTRAINT `order_items_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+use chithuy;
+
+select * from products;
+
+select * from product_images;
+
+select * from users;
+
+UPDATE users
+SET email = 'admin@roomi.com'
+WHERE email = 'admin@roomi.com.vn';

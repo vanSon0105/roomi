@@ -35,6 +35,21 @@ Base URL:
 http://localhost:4000/api
 ```
 
+Frontend served by backend:
+
+```txt
+http://localhost:4000
+```
+
+Protected pages are checked by the backend before serving HTML:
+
+```txt
+cart.html
+checkout.html
+checkout-success.html
+room-3d.html
+```
+
 Health:
 
 ```txt
@@ -46,6 +61,9 @@ Auth:
 ```txt
 POST /auth/register
 POST /auth/login
+POST /auth/logout
+GET /auth/me
+GET /auth/page-access?path=cart.html
 ```
 
 Users:
@@ -58,11 +76,13 @@ PATCH /users/:id
 DELETE /users/:id
 ```
 
-Protected user routes require:
+Protected API routes accept either:
 
 ```txt
 Authorization: Bearer <token>
 ```
+
+or the `roomi_token` HTTP-only cookie set by `POST /auth/login` / `POST /auth/register`.
 
 Success response format:
 

@@ -2,6 +2,7 @@ const cors = require('cors');
 const express = require('express');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const path = require('path');
 
 const config = require('./config/env');
 const apiRoutes = require('./routes');
@@ -9,18 +10,33 @@ const {
   errorHandler,
   notFoundHandler,
 } = require('./middlewares/error.middleware');
+const pageAccessMiddleware = require('./middlewares/page-access.middleware');
 
 const app = express();
+const frontendPath = path.resolve(__dirname, '..', '..', 'frontend');
 
 app.disable('x-powered-by');
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        'script-src': ["'self'", 'https://unpkg.com'],
+        'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
+        'img-src': ["'self'", 'data:'],
+      },
+    },
+  }),
+);
 app.use(
   cors({
     origin:
       config.corsOrigin === '*'
-        ? '*'
+        ? true
         : config.corsOrigin.split(',').map((origin) => origin.trim()),
+    credentials: true,
   }),
 );
 app.use(express.json({ limit: '1mb' }));
@@ -31,6 +47,12 @@ if (config.nodeEnv !== 'test') {
 }
 
 app.use('/api', apiRoutes);
+app.use(pageAccessMiddleware);
+app.use(express.static(frontendPath));
+
+app.get('/', (_req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
 app.use(notFoundHandler);
 app.use(errorHandler);

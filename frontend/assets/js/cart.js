@@ -1,10 +1,9 @@
 import { cartItems, formatCurrency } from './data.js';
-import { miniArt, observeReveal, renderShell, requireAuth } from './common.js?v=nav-public-1';
+import { miniArt, observeReveal, renderShell } from './common.js?v=nav-public-1';
 
 renderShell('cart');
 
 const root = document.querySelector('#cartRoot');
-const canViewCart = requireAuth();
 let items = cartItems.map((product, index) => ({
   id: `${product.id}-${index}`,
   product,
@@ -16,7 +15,7 @@ function totalOf(item) {
 }
 
 function renderCart() {
-  if (!root || !canViewCart) return;
+  if (!root) return;
 
   const subtotal = items.reduce((sum, item) => sum + totalOf(item), 0);
 
@@ -63,8 +62,6 @@ function renderCart() {
 }
 
 root?.addEventListener('click', (event) => {
-  if (!canViewCart) return;
-
   const remove = event.target.closest('[data-remove]');
   const increase = event.target.closest('[data-increase]');
   const decrease = event.target.closest('[data-decrease]');
@@ -89,9 +86,9 @@ root?.addEventListener('click', (event) => {
 
   renderCart();
   observeReveal();
-});
-
-if (canViewCart) {
   renderCart();
   observeReveal();
-}
+});
+
+renderCart();
+observeReveal();

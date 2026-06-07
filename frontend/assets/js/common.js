@@ -1,6 +1,10 @@
 import { categoryLabel, formatCurrency } from './data.js';
 
-export const AUTH_KEY = 'roomi-authenticated';
+export const API_BASE =
+  window.ROOMI_API_BASE ||
+  (window.location.protocol.startsWith('http') && window.location.port === '4000'
+    ? '/api'
+    : 'http://localhost:4000/api');
 
 const rootPrefix = '';
 
@@ -8,30 +12,41 @@ function active(page, id) {
   return page === id ? 'is-active' : '';
 }
 
-export function isAuthenticated() {
-  try {
-    return window.localStorage.getItem(AUTH_KEY) === 'true';
-  } catch {
-    return false;
-  }
-}
-
 export function protectedHref(path) {
-  return isAuthenticated() ? path : `login.html?redirect=${encodeURIComponent(path)}`;
+  return path;
 }
 
 export function requireAuth() {
-  if (isAuthenticated()) return true;
+  return true;
+}
 
-  const currentPage = `${window.location.pathname.split('/').pop() || 'index.html'}${window.location.search}`;
-  window.location.href = `login.html?redirect=${encodeURIComponent(currentPage)}`;
-  return false;
+export async function apiFetch(path, options = {}) {
+  const response = await fetch(`${API_BASE}${path}`, {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+    ...options,
+  });
+
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(payload?.message || 'Request failed');
+  }
+
+  return payload;
 }
 
 export function renderShell(page = '') {
   const headerSlot = document.querySelector('[data-header]');
   const footerSlot = document.querySelector('[data-footer]');
   const chatSlot = document.querySelector('[data-chat]');
+  const isAuthRequiredPage = document.body.dataset.authRequired === 'true';
+  const accountDesktopLink = isAuthRequiredPage
+    ? `<a class="${active(page, 'login')}" href="login.html">Đăng nhập</a>`
+    : `<a class="nav-icon ${active(page, 'login')}" href="login.html" aria-label="Tài khoản"><i class="ph-fill ph-user-square"></i></a>`;
 
   if (headerSlot) {
     headerSlot.innerHTML = `
@@ -49,7 +64,7 @@ export function renderShell(page = '') {
             <a class="${active(page, 'about')}" href="about.html">Về chúng tôi</a>
             <a class="${active(page, 'room-3d')}" href="room-3d.html">Mô phỏng 3D</a>
             <a class="nav-icon ${active(page, 'cart')}" href="cart.html" aria-label="Giỏ hàng"><i class="ph-fill ph-shopping-cart-simple"></i></a>
-            <a class="nav-icon ${active(page, 'login')}" href="login.html" aria-label="Tài khoản"><i class="ph-fill ph-user-square"></i></a>
+            ${accountDesktopLink}
           </nav>
           <button class="menu-trigger" type="button" aria-label="Mở menu" data-menu-open>
             <span></span><span></span><span></span>

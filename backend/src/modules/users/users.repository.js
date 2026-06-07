@@ -62,6 +62,14 @@ const findByEmail = (email, { withPassword = false } = {}) =>
     select: withPassword ? userWithPasswordSelect : safeUserSelect,
   });
 
+const findByEmailOrName = (identifier, { withPassword = false } = {}) =>
+  prisma.user.findFirst({
+    where: {
+      OR: [{ email: identifier }, { name: identifier }],
+    },
+    select: withPassword ? userWithPasswordSelect : safeUserSelect,
+  });
+
 const create = ({ name, email, password }) =>
   prisma.user.create({
     data: {
@@ -89,6 +97,7 @@ module.exports = {
   create,
   findAll,
   findByEmail,
+  findByEmailOrName,
   findById,
   remove,
   update,

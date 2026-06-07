@@ -1,24 +1,15 @@
-const jwt = require('jsonwebtoken');
-
-const config = require('../config/env');
+const { getTokenFromRequest, verifyToken } = require('../modules/auth/auth-token');
 const AppError = require('../utils/app-error');
 
 const authMiddleware = (req, _res, next) => {
-  const authHeader = req.headers.authorization;
+  const token = getTokenFromRequest(req);
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (!token) {
     return next(new AppError('Authentication token is required', 401));
   }
 
-  const token = authHeader.slice('Bearer '.length);
-
   try {
-    const payload = jwt.verify(token, config.jwtSecret);
-    req.user = {
-      id: Number(payload.sub),
-      email: payload.email,
-      role: payload.role,
-    };
+    req.user = verifyToken(token);
 
     return next();
   } catch (_error) {

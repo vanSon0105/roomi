@@ -13,6 +13,8 @@ const config = {
   databaseUrl: process.env.DATABASE_URL,
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  authCookieName: process.env.AUTH_COOKIE_NAME || 'roomi_token',
+  authCookieMaxAgeSeconds: Number(process.env.AUTH_COOKIE_MAX_AGE_SECONDS || 7 * 24 * 60 * 60),
   corsOrigin: process.env.CORS_ORIGIN || '*',
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS || 10),
 };
@@ -23,6 +25,10 @@ if (!Number.isInteger(config.port) || config.port <= 0) {
 
 if (!Number.isInteger(config.bcryptSaltRounds) || config.bcryptSaltRounds < 8) {
   throw new Error('BCRYPT_SALT_ROUNDS must be an integer greater than or equal to 8');
+}
+
+if (!Number.isInteger(config.authCookieMaxAgeSeconds) || config.authCookieMaxAgeSeconds <= 0) {
+  throw new Error('AUTH_COOKIE_MAX_AGE_SECONDS must be a positive integer');
 }
 
 module.exports = config;

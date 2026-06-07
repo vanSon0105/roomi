@@ -1,11 +1,10 @@
 import { cartItems, formatCurrency } from './data.js';
-import { miniArt, observeReveal, renderShell, requireAuth } from './common.js?v=nav-public-1';
+import { miniArt, observeReveal, renderShell } from './common.js?v=nav-public-1';
 
 renderShell('cart');
 
 const root = document.querySelector('#checkoutRoot');
 const mode = document.body.dataset.checkout || 'form';
-const canCheckout = requireAuth();
 const items = cartItems.slice(0, 3).map((product, index) => ({
   product,
   quantity: index === 0 ? 2 : 1,
@@ -14,7 +13,7 @@ const subtotal = items.reduce((sum, item) => sum + item.product.price * item.qua
 const shipping = 30000;
 const total = subtotal + shipping;
 
-if (root && canCheckout && mode === 'success') {
+if (root && mode === 'success') {
   root.innerHTML = `
     <section class="locked-state container reveal">
       <div>
@@ -30,7 +29,7 @@ if (root && canCheckout && mode === 'success') {
   `;
 }
 
-if (root && canCheckout && mode !== 'success') {
+if (root && mode !== 'success') {
   root.innerHTML = `
     <section class="container checkout-title-row reveal">
       <h1>Thanh toán</h1>
@@ -92,6 +91,4 @@ if (root && canCheckout && mode !== 'success') {
   `;
 }
 
-if (canCheckout) {
-  observeReveal();
-}
+observeReveal();

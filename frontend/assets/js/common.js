@@ -210,13 +210,17 @@ export function renderShell(page = '') {
 
 function markAuthenticatedAccount(user) {
   const accountLabel = user?.email ? `Tài khoản ${user.email}` : 'Tài khoản';
+  const accountHref = user?.role === 'ADMIN' ? pageHref('admin/dashboard.html') : '#';
 
   document.querySelectorAll('[data-account-link]').forEach((link) => {
     link.classList.add('is-authenticated');
-    link.href = '#';
+    link.href = accountHref;
     link.setAttribute('aria-label', accountLabel);
     link.setAttribute('title', accountLabel);
-    link.addEventListener('click', (event) => event.preventDefault());
+
+    if (accountHref === '#') {
+      link.addEventListener('click', (event) => event.preventDefault());
+    }
 
     const text = link.querySelector('[data-account-text]');
     const icon = link.querySelector('[data-account-icon]');
@@ -232,10 +236,13 @@ function markAuthenticatedAccount(user) {
 
   document.querySelectorAll('[data-mobile-account-link]').forEach((link) => {
     link.classList.add('is-authenticated');
-    link.href = '#';
+    link.href = accountHref;
     link.textContent = 'Tài khoản';
     link.setAttribute('aria-label', accountLabel);
-    link.addEventListener('click', (event) => event.preventDefault());
+
+    if (accountHref === '#') {
+      link.addEventListener('click', (event) => event.preventDefault());
+    }
   });
 }
 

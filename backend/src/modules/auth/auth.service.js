@@ -28,15 +28,19 @@ const protectedPages = {
   },
 };
 
-const normalizePagePath = (value = '') =>
+const normalizePath = (value = '') =>
   value
     .replace(/^\/+/, '')
     .split('?')[0]
     .split('#')[0]
-    .split('/')
-    .pop()
     .trim()
     .toLowerCase();
+
+const normalizePagePath = (value = '') =>
+  normalizePath(value)
+    .split('/')
+    .pop()
+    .trim();
 
 const register = async ({ name, email, phone, password }) => {
   const existingUser = await usersRepository.findByEmail(email);
@@ -89,7 +93,34 @@ const login = async ({ identifier, password }) => {
 };
 
 const getPageAccess = ({ path = '', user = null } = {}) => {
+  const normalizedFullPath = normalizePath(path);
   const normalizedPath = normalizePagePath(path);
+  const isAdminPage = normalizedFullPath.startsWith('pages/admin/') || normalizedFullPath.startsWith('admin/');
+
+  if (isAdminPage) {
+    if (user?.role === 'ADMIN') {
+      return {
+        allowed: true,
+        page: 'admin',
+        protected: true,
+        roles: ['ADMIN'],
+        user,
+      };
+    }
+
+    return {
+      allowed: false,
+      page: 'admin',
+      protected: true,
+      roles: ['ADMIN'],
+      message: user
+        ? 'Bạn không có quyền truy cập trang quản trị'
+        : 'Hãy đăng nhập bằng tài khoản admin để vào trang quản trị',
+      redirectPath: normalizedFullPath.replace(/^pages\//, ''),
+      statusCode: user ? 403 : 401,
+    };
+  }
+
   const rule = protectedPages[normalizedPath];
 
   if (!rule) {

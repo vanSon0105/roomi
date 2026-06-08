@@ -7,7 +7,6 @@ const AUTOPLAY_DELAY = 2000;
 
 const carousel = document.querySelector('[data-about-carousel]');
 const bestSellerStrip = document.querySelector('#aboutBestSellerStrip');
-const dotsRoot = document.querySelector('#aboutBestSellerDots');
 const prevButton = document.querySelector('[data-about-carousel-prev]');
 const nextButton = document.querySelector('[data-about-carousel-next]');
 
@@ -41,36 +40,57 @@ function stopAutoplay() {
 function startAutoplay() {
   stopAutoplay();
 
-  if (slideCount <= 1 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const metrics = getCarouselMetrics();
+
+  if ((metrics?.usableSlideCount || 0) <= 1 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   autoplayTimer = window.setInterval(() => {
     moveCarousel(1, false);
   }, AUTOPLAY_DELAY);
 }
 
-function renderDots() {
-  if (!dotsRoot) return;
-
-  dotsRoot.innerHTML = Array.from({ length: slideCount }, (_, index) => `<span class="${index === activeSlide ? 'is-active' : ''}"></span>`).join('');
-}
-
-function updateCarousel({ animate = true } = {}) {
-  if (!bestSellerStrip || !carousel) return;
+function getCarouselMetrics() {
+  if (!bestSellerStrip || !carousel) return null;
 
   const cards = Array.from(bestSellerStrip.querySelectorAll('.about-sale-card:not(.is-empty)'));
-  const activeCard = cards[activeSlide];
+  const firstCard = cards[0];
   const viewport = carousel.querySelector('.about-carousel-viewport');
 
-  if (!activeCard || !viewport) return;
-
-  cards.forEach((card, index) => card.classList.toggle('is-active', index === activeSlide));
+  if (!firstCard || !viewport) return null;
 
   const stripStyle = window.getComputedStyle(bestSellerStrip);
   const gap = Number.parseFloat(stripStyle.columnGap || stripStyle.gap || '0') || 0;
-  const cardWidth = activeCard.getBoundingClientRect().width;
+  const cardWidth = firstCard.getBoundingClientRect().width;
   const viewportWidth = viewport.getBoundingClientRect().width;
+  const step = cardWidth + gap;
   const maxScroll = Math.max(0, bestSellerStrip.scrollWidth - viewportWidth);
-  const nextScroll = Math.min(activeSlide * (cardWidth + gap), maxScroll);
+  const maxSlideIndex = Math.min(cards.length - 1, step > 0 ? Math.ceil(maxScroll / step) : 0);
+
+  return {
+    cards,
+    maxScroll,
+    maxSlideIndex,
+    step,
+    usableSlideCount: maxSlideIndex + 1,
+  };
+}
+
+function updateControls(usableSlideCount = 0) {
+  prevButton?.toggleAttribute('hidden', usableSlideCount <= 1);
+  nextButton?.toggleAttribute('hidden', usableSlideCount <= 1);
+}
+
+function updateCarousel({ animate = true } = {}) {
+  const metrics = getCarouselMetrics();
+
+  if (!metrics) return;
+
+  activeSlide = Math.min(activeSlide, metrics.maxSlideIndex);
+
+  metrics.cards.forEach((card, index) => card.classList.toggle('is-active', index === activeSlide));
+  updateControls(metrics.usableSlideCount);
+
+  const nextScroll = Math.min(activeSlide * metrics.step, metrics.maxScroll);
   const offset = -nextScroll;
 
   if (!animate) {
@@ -84,14 +104,15 @@ function updateCarousel({ animate = true } = {}) {
       bestSellerStrip.style.transition = '';
     });
   }
-
-  renderDots();
 }
 
 function moveCarousel(direction, manual = true) {
-  if (slideCount <= 1) return;
+  const metrics = getCarouselMetrics();
+  const usableSlideCount = metrics?.usableSlideCount || 0;
 
-  activeSlide = (activeSlide + direction + slideCount) % slideCount;
+  if (usableSlideCount <= 1) return;
+
+  activeSlide = (activeSlide + direction + usableSlideCount) % usableSlideCount;
   updateCarousel();
 
   if (manual) {
@@ -123,15 +144,12 @@ function renderAboutProducts(products) {
     bestSellerStrip.innerHTML = '<p class="empty-copy">Chưa có sản phẩm bán chạy.</p>';
     slideCount = 0;
     stopAutoplay();
-    renderDots();
     return;
   }
 
   activeSlide = 0;
   slideCount = Math.min(products.length, 5);
   bestSellerStrip.innerHTML = products.slice(0, 5).map(aboutSaleCard).join('');
-  prevButton?.toggleAttribute('hidden', slideCount <= 1);
-  nextButton?.toggleAttribute('hidden', slideCount <= 1);
   updateCarousel({ animate: false });
   startAutoplay();
   observeReveal();

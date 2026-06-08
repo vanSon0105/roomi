@@ -2807,24 +2807,6 @@ body.checkout-payment-page .payment-actions .btn:disabled {
   right: clamp(16px, 3vw, 56px);
 }
 
-.about-dots {
-  margin-top: 58px;
-  display: flex;
-  justify-content: center;
-  gap: 22px;
-}
-
-.about-dots span {
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  background: #fff;
-}
-
-.about-dots .is-active {
-  background: #e24d49;
-}
-
 .locked-state {
   min-height: 62dvh;
   display: grid;

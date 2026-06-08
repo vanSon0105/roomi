@@ -1,5 +1,5 @@
 ﻿import { formatCurrency } from './data.js';
-import { apiFetch, escapeHtml, miniArt, observeReveal, renderShell } from './common.js?v=chat-icon-1';
+import { apiFetch, escapeHtml, miniArt, observeReveal, pageHref, renderShell } from './common.js?v=pages-path-1';
 
 renderShell('cart');
 
@@ -41,7 +41,7 @@ function renderEmpty() {
       <div>
         <h1>Giỏ hàng đang trống</h1>
         <p>Chọn sản phẩm yêu thích rồi thêm vào giỏ để bắt đầu đặt hàng.</p>
-        <a class="btn btn-maroon" href="products.html">Xem sản phẩm</a>
+        <a class="btn btn-maroon" href="${pageHref('products.html')}">Xem sản phẩm</a>
       </div>
     </section>
   `;
@@ -117,7 +117,7 @@ function renderCart() {
         <div class="cart-summary">
           <span>${canCheckout ? `Đã chọn ${selectedCount} sản phẩm` : 'Chọn sản phẩm để thanh toán'}</span>
           <strong>${formatCurrency(selectedSubtotal)}</strong>
-          <a class="btn btn-cream ${canCheckout ? '' : 'is-disabled'}" href="${canCheckout ? 'checkout.html' : '#'}" data-checkout-link aria-disabled="${canCheckout ? 'false' : 'true'}">Thanh toán</a>
+          <a class="btn btn-cream ${canCheckout ? '' : 'is-disabled'}" href="${canCheckout ? pageHref('checkout.html') : '#'}" data-checkout-link aria-disabled="${canCheckout ? 'false' : 'true'}">Thanh toán</a>
         </div>
       </div>
     </section>

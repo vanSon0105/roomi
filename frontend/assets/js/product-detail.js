@@ -4,12 +4,13 @@ import {
   escapeHtml,
   miniArt,
   observeReveal,
+  pageHref,
   productArt,
   productCard,
   redirectToLogin,
   renderShell,
   stars,
-} from './common.js?v=chat-icon-1';
+} from './common.js?v=pages-path-1';
 
 renderShell('products');
 
@@ -32,7 +33,7 @@ function renderError(error) {
       <div>
         <h1>Không tải được sản phẩm</h1>
         <p>${escapeHtml(error.message || 'Sản phẩm không tồn tại.')}</p>
-        <a class="btn btn-maroon" href="products.html">Quay lại sản phẩm</a>
+        <a class="btn btn-maroon" href="${pageHref('products.html')}">Quay lại sản phẩm</a>
       </div>
     </section>
   `;
@@ -53,7 +54,7 @@ function renderProduct(product, related) {
         ${productArt(product.name, product.imageUrl)}
       </div>
       <article class="detail-copy reveal" style="--index:1">
-        <a class="btn btn-outline" href="products.html">Quay lại sản phẩm</a>
+        <a class="btn btn-outline" href="${pageHref('products.html')}">Quay lại sản phẩm</a>
         <h1>${escapeHtml(product.name)}</h1>
         <div class="detail-rating">
           <span class="stars">${stars(product.rating)}</span>
@@ -216,7 +217,7 @@ async function confirmBuyNow(button) {
       sessionStorage.setItem(SELECTED_CART_STORAGE_KEY, JSON.stringify([selectedItem.id]));
     }
 
-    window.location.href = 'checkout.html';
+    window.location.href = pageHref('checkout.html');
   } catch (error) {
     if (error.status === 401) {
       redirectToLogin();

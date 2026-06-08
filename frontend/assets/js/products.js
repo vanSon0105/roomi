@@ -1,4 +1,4 @@
-﻿import { apiFetch, escapeHtml, observeReveal, productCard, renderShell } from './common.js?v=chat-icon-1';
+﻿import { apiFetch, escapeHtml, observeReveal, productCard, renderShell } from './common.js?v=pages-path-1';
 
 renderShell('products');
 

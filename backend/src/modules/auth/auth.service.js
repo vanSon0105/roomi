@@ -33,6 +33,8 @@ const normalizePagePath = (value = '') =>
     .replace(/^\/+/, '')
     .split('?')[0]
     .split('#')[0]
+    .split('/')
+    .pop()
     .trim()
     .toLowerCase();
 

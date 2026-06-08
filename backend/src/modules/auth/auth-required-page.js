@@ -9,7 +9,7 @@ const escapeHtml = (value = '') =>
 const renderAuthRequiredPage = ({ page, message, redirectPath }) => {
   const safePage = escapeHtml(page);
   const safeMessage = escapeHtml(message);
-  const loginHref = `login.html?redirect=${encodeURIComponent(redirectPath)}`;
+  const loginHref = `/pages/login.html?redirect=${encodeURIComponent(redirectPath)}`;
 
   return `<!doctype html>
 <html lang="vi">
@@ -18,7 +18,7 @@ const renderAuthRequiredPage = ({ page, message, redirectPath }) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập - ROOMI</title>
     <meta name="description" content="${safeMessage}.">
-    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="/assets/css/styles.css">
   </head>
   <body data-auth-required="true" data-auth-page="${safePage}">
     <div data-header></div>
@@ -29,7 +29,7 @@ const renderAuthRequiredPage = ({ page, message, redirectPath }) => {
       </section>
     </main>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script type="module" src="assets/js/auth-required.js?v=backend-auth-1"></script>
+    <script type="module" src="/assets/js/auth-required.js?v=pages-path-1"></script>
   </body>
 </html>`;
 };

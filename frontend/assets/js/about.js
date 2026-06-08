@@ -1,4 +1,4 @@
-﻿import { observeReveal, renderShell } from './common.js?v=chat-icon-1';
+﻿import { observeReveal, renderShell } from './common.js?v=pages-path-1';
 
 renderShell('about');
 observeReveal();

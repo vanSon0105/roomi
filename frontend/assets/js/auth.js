@@ -1,11 +1,16 @@
-﻿import { apiFetch, observeReveal } from './common.js?v=chat-icon-1';
+﻿import { apiFetch, homeHref, observeReveal } from './common.js?v=pages-path-1';
 
 const form = document.querySelector('[data-auth-form]');
 const notice = document.querySelector('[data-auth-notice]');
 const page = document.body.dataset.page || 'login';
 
 function safeRedirectOf(value) {
-  return value && !value.includes('://') && !value.startsWith('//') ? value : 'index.html';
+  if (!value || value.includes('://') || value.startsWith('//')) {
+    return homeHref;
+  }
+
+  const normalized = value.replace(/^\/?pages\//, '');
+  return normalized === 'index.html' || normalized === '/index.html' ? homeHref : normalized;
 }
 
 form?.addEventListener('submit', async (event) => {

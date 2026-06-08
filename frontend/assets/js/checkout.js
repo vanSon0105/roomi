@@ -1,5 +1,5 @@
 ﻿import { formatCurrency } from './data.js';
-import { apiFetch, escapeHtml, miniArt, observeReveal, renderShell } from './common.js?v=chat-icon-1';
+import { apiFetch, escapeHtml, homeHref, miniArt, observeReveal, pageHref, renderShell } from './common.js?v=pages-path-1';
 
 renderShell('cart');
 
@@ -58,7 +58,7 @@ function renderEmpty() {
       <div>
         <h1>Giỏ hàng đang trống</h1>
         <p>Thêm sản phẩm vào giỏ trước khi thanh toán.</p>
-        <a class="btn btn-maroon" href="products.html">Xem sản phẩm</a>
+        <a class="btn btn-maroon" href="${pageHref('products.html')}">Xem sản phẩm</a>
       </div>
     </section>
   `;
@@ -195,7 +195,7 @@ function renderOrderPayment(order, { successView = false } = {}) {
         </div>
         <div class="payment-actions">
           ${renderReportPaidAction(order)}
-          <a class="btn btn-outline" href="products.html">Tiếp tục mua sắm</a>
+          <a class="btn btn-outline" href="${pageHref('products.html')}">Tiếp tục mua sắm</a>
         </div>
       </div>
     </section>
@@ -273,7 +273,7 @@ function renderCheckout(cart) {
         <div>
           <h1>Chưa chọn sản phẩm</h1>
           <p>Quay lại giỏ hàng và tick vào sản phẩm bạn muốn thanh toán trước.</p>
-          <a class="btn btn-maroon" href="cart.html">Quay lại giỏ hàng</a>
+          <a class="btn btn-maroon" href="${pageHref('cart.html')}">Quay lại giỏ hàng</a>
         </div>
       </section>
     `;
@@ -363,8 +363,8 @@ async function renderSuccess() {
           <h1>Đơn hàng đã được tạo</h1>
           <p>ROOMI sẽ kiểm tra thanh toán và liên hệ xác nhận đơn hàng.</p>
           <div style="display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:32px">
-            <a class="btn btn-maroon" href="products.html">Tiếp tục mua sắm</a>
-            <a class="btn btn-outline" href="index.html">Về trang chủ</a>
+            <a class="btn btn-maroon" href="${pageHref('products.html')}">Tiếp tục mua sắm</a>
+            <a class="btn btn-outline" href="${homeHref}">Về trang chủ</a>
           </div>
         </div>
       </section>

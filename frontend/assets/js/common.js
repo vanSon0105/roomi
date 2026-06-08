@@ -6,7 +6,9 @@ export const API_BASE = '/api';
   //   ? '/api'
   //   : 'http://localhost:4000/api');
 
-const rootPrefix = '';
+const isInPages = window.location.pathname.replace(/\\/g, '/').includes('/pages/');
+const rootPrefix = isInPages ? '../' : '';
+const pagePrefix = isInPages ? '' : 'pages/';
 const cartIconSrc = `${rootPrefix}assets/images/cart-icon.png`;
 const userIconSrc = `${rootPrefix}assets/images/user-icon.png`;
 const chatIconSrc = `${rootPrefix}assets/images/figma/homepage/chat icon.png`;
@@ -16,11 +18,21 @@ function active(page, id) {
 }
 
 export function protectedHref(path) {
-  return path;
+  return pageHref(path);
 }
 
 export function requireAuth() {
   return true;
+}
+
+export const homeHref = `${rootPrefix}index.html`;
+
+export function pageHref(path) {
+  if (!path || path === 'index.html') {
+    return homeHref;
+  }
+
+  return `${pagePrefix}${path}`;
 }
 
 export async function apiFetch(path, options = {}) {
@@ -56,7 +68,7 @@ export function escapeHtml(value = '') {
 
 export function redirectToLogin() {
   const currentPage = `${window.location.pathname.split('/').pop() || 'index.html'}${window.location.search}`;
-  window.location.href = `login.html?redirect=${encodeURIComponent(currentPage)}`;
+  window.location.href = `${pageHref('login.html')}?redirect=${encodeURIComponent(currentPage)}`;
 }
 
 export function mediaUrl(path) {
@@ -76,14 +88,14 @@ export function renderShell(page = '') {
   const footerSlot = document.querySelector('[data-footer]');
   const chatSlot = document.querySelector('[data-chat]');
   const accountDesktopLink = `
-    <a class="nav-account ${active(page, 'login')}" href="login.html" data-account-link>
+    <a class="nav-account ${active(page, 'login')}" href="${pageHref('login.html')}" data-account-link>
       <span data-account-text>Đăng nhập</span>
       <img class="nav-account-icon" src="${userIconSrc}" alt="" data-account-icon hidden>
     </a>
   `;
-  const accountMobileLink = `<a style="--delay:400ms" class="${active(page, 'login')}" href="login.html" data-mobile-account-link>Đăng nhập</a>`;
+  const accountMobileLink = `<a style="--delay:400ms" class="${active(page, 'login')}" href="${pageHref('login.html')}" data-mobile-account-link>Đăng nhập</a>`;
   const cartDesktopLink = `
-    <a class="nav-icon nav-cart ${active(page, 'cart')}" href="cart.html" aria-label="Giỏ hàng">
+    <a class="nav-icon nav-cart ${active(page, 'cart')}" href="${pageHref('cart.html')}" aria-label="Giỏ hàng">
       <img src="${cartIconSrc}" alt="">
     </a>
   `;
@@ -92,7 +104,7 @@ export function renderShell(page = '') {
     headerSlot.innerHTML = `
       <header class="site-header">
         <div class="header-inner">
-          <a class="brand-link" href="index.html" aria-label="ROOMI trang chủ">
+          <a class="brand-link" href="${homeHref}" aria-label="ROOMI trang chủ">
             <img src="${rootPrefix}assets/images/figma/logo-roomi-navbar.png" alt="ROOMI">
           </a>
           <form class="search-pill" role="search">
@@ -100,9 +112,9 @@ export function renderShell(page = '') {
             <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
           </form>
           <nav class="desktop-nav" aria-label="Điều hướng chính">
-            <a class="${active(page, 'products')}" href="products.html">Sản phẩm</a>
-            <a class="${active(page, 'about')}" href="about.html">Về chúng tôi</a>
-            <a class="${active(page, 'room-3d')}" href="room-3d.html">Mô phỏng 3D</a>
+            <a class="${active(page, 'products')}" href="${pageHref('products.html')}">Sản phẩm</a>
+            <a class="${active(page, 'about')}" href="${pageHref('about.html')}">Về chúng tôi</a>
+            <a class="${active(page, 'room-3d')}" href="${pageHref('room-3d.html')}">Mô phỏng 3D</a>
             ${cartDesktopLink}
             ${accountDesktopLink}
           </nav>
@@ -116,10 +128,10 @@ export function renderShell(page = '') {
             <button type="button" aria-label="Đóng menu" data-menu-close><i class="ph-bold ph-x"></i></button>
           </div>
           <nav>
-            <a style="--delay:120ms" class="${active(page, 'products')}" href="products.html">Sản phẩm</a>
-            <a style="--delay:190ms" class="${active(page, 'about')}" href="about.html">Về chúng tôi</a>
-            <a style="--delay:260ms" class="${active(page, 'room-3d')}" href="room-3d.html">Mô phỏng 3D</a>
-            <a style="--delay:330ms" class="${active(page, 'cart')}" href="cart.html">Giỏ hàng</a>
+            <a style="--delay:120ms" class="${active(page, 'products')}" href="${pageHref('products.html')}">Sản phẩm</a>
+            <a style="--delay:190ms" class="${active(page, 'about')}" href="${pageHref('about.html')}">Về chúng tôi</a>
+            <a style="--delay:260ms" class="${active(page, 'room-3d')}" href="${pageHref('room-3d.html')}">Mô phỏng 3D</a>
+            <a style="--delay:330ms" class="${active(page, 'cart')}" href="${pageHref('cart.html')}">Giỏ hàng</a>
             ${accountMobileLink}
           </nav>
         </aside>
@@ -132,7 +144,7 @@ export function renderShell(page = '') {
       <footer class="site-footer">
         <div class="footer-inner">
           <div class="footer-logo">
-            <a href="index.html">
+            <a href="${homeHref}">
               <img src="${rootPrefix}assets/images/figma/logo-roomi-footer.png" alt="ROOMI">
             </a>
           </div>
@@ -280,7 +292,7 @@ export function productCard(product, index = 0) {
   const categoryText = product.categoryLabel || product.category || '';
 
   return `
-    <a class="product-card" style="--index:${index}" href="product-detail.html?id=${encodeURIComponent(slug)}" aria-label="${escapeHtml(product.name)}">
+    <a class="product-card" style="--index:${index}" href="${pageHref('product-detail.html')}?id=${encodeURIComponent(slug)}" aria-label="${escapeHtml(product.name)}">
       ${productArt(product.name, product.imageUrl)}
       <div class="product-info">
         <h3>${escapeHtml(product.name)}</h3>

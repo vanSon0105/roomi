@@ -18,6 +18,7 @@ const renderAuthRequiredPage = ({ page, message, redirectPath }) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập - ROOMI</title>
     <meta name="description" content="${safeMessage}.">
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/assets/css/styles.css">
   </head>
   <body data-auth-required="true" data-auth-page="${safePage}">

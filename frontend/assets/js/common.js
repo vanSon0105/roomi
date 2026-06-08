@@ -6,9 +6,11 @@ export const API_BASE = '/api';
   //   ? '/api'
   //   : 'http://localhost:4000/api');
 
-const isInPages = window.location.pathname.replace(/\\/g, '/').includes('/pages/');
-const rootPrefix = isInPages ? '../' : '';
-const pagePrefix = isInPages ? '' : 'pages/';
+const normalizedPathname = window.location.pathname.replace(/\\/g, '/');
+const isInAdminPages = normalizedPathname.includes('/pages/admin/');
+const isInPages = normalizedPathname.includes('/pages/');
+const rootPrefix = isInAdminPages ? '../../' : isInPages ? '../' : '';
+const pagePrefix = isInAdminPages ? '../' : isInPages ? '' : 'pages/';
 const cartIconSrc = `${rootPrefix}assets/images/cart-icon.png`;
 const userIconSrc = `${rootPrefix}assets/images/user-icon.png`;
 const chatIconSrc = `${rootPrefix}assets/images/figma/homepage/chat icon.png`;
@@ -32,7 +34,13 @@ export function pageHref(path) {
     return homeHref;
   }
 
-  return `${pagePrefix}${path}`;
+  const normalizedPath = path.replace(/^\/+/, '');
+
+  if (isInAdminPages && normalizedPath.startsWith('admin/')) {
+    return normalizedPath.replace(/^admin\//, '');
+  }
+
+  return `${pagePrefix}${normalizedPath}`;
 }
 
 export async function apiFetch(path, options = {}) {
@@ -67,7 +75,13 @@ export function escapeHtml(value = '') {
 }
 
 export function redirectToLogin() {
-  const currentPage = `${window.location.pathname.split('/').pop() || 'index.html'}${window.location.search}`;
+  const pagesMarker = '/pages/';
+  const pagesIndex = normalizedPathname.indexOf(pagesMarker);
+  const currentPath =
+    pagesIndex >= 0
+      ? normalizedPathname.slice(pagesIndex + pagesMarker.length) || 'index.html'
+      : normalizedPathname.split('/').pop() || 'index.html';
+  const currentPage = `${currentPath}${window.location.search}`;
   window.location.href = `${pageHref('login.html')}?redirect=${encodeURIComponent(currentPage)}`;
 }
 
@@ -88,12 +102,18 @@ export function renderShell(page = '') {
   const footerSlot = document.querySelector('[data-footer]');
   const chatSlot = document.querySelector('[data-chat]');
   const accountDesktopLink = `
-    <a class="nav-account ${active(page, 'login')}" href="${pageHref('login.html')}" data-account-link>
+    <a class="nav-account ${active(page, 'login') || active(page, 'account')}" href="${pageHref('login.html')}" data-account-link>
       <span data-account-text>Đăng nhập</span>
       <img class="nav-account-icon" src="${userIconSrc}" alt="" data-account-icon hidden>
     </a>
   `;
+  const adminDesktopLink = `
+    <a class="nav-icon nav-admin-link" href="${pageHref('admin/dashboard.html')}" aria-label="Trang qu\u1ea3n tr\u1ecb" title="Trang qu\u1ea3n tr\u1ecb" data-admin-link hidden>
+      <i class="ph ph-gauge" aria-hidden="true"></i>
+    </a>
+  `;
   const accountMobileLink = `<a style="--delay:400ms" class="${active(page, 'login')}" href="${pageHref('login.html')}" data-mobile-account-link>Đăng nhập</a>`;
+  const adminMobileLink = `<a style="--delay:470ms" href="${pageHref('admin/dashboard.html')}" data-mobile-admin-link hidden>Qu\u1ea3n tr\u1ecb</a>`;
   const cartDesktopLink = `
     <a class="nav-icon nav-cart ${active(page, 'cart')}" href="${pageHref('cart.html')}" aria-label="Giỏ hàng">
       <img src="${cartIconSrc}" alt="">
@@ -117,6 +137,7 @@ export function renderShell(page = '') {
             <a class="${active(page, 'room-3d')}" href="${pageHref('room-3d.html')}">Mô phỏng 3D</a>
             ${cartDesktopLink}
             ${accountDesktopLink}
+            ${adminDesktopLink}
           </nav>
           <button class="menu-trigger" type="button" aria-label="Mở menu" data-menu-open>
             <span></span><span></span><span></span>
@@ -133,6 +154,7 @@ export function renderShell(page = '') {
             <a style="--delay:260ms" class="${active(page, 'room-3d')}" href="${pageHref('room-3d.html')}">Mô phỏng 3D</a>
             <a style="--delay:330ms" class="${active(page, 'cart')}" href="${pageHref('cart.html')}">Giỏ hàng</a>
             ${accountMobileLink}
+            ${adminMobileLink}
           </nav>
         </aside>
       </header>
@@ -209,18 +231,15 @@ export function renderShell(page = '') {
 }
 
 function markAuthenticatedAccount(user) {
-  const accountLabel = user?.email ? `Tài khoản ${user.email}` : 'Tài khoản';
-  const accountHref = user?.role === 'ADMIN' ? pageHref('admin/dashboard.html') : '#';
+  const accountLabel = user?.email ? `T\u00e0i kho\u1ea3n ${user.email}` : 'T\u00e0i kho\u1ea3n';
+  const accountHref = pageHref('account.html');
+  const avatarSrc = user?.avatarUrl ? mediaUrl(user.avatarUrl) : userIconSrc;
 
   document.querySelectorAll('[data-account-link]').forEach((link) => {
     link.classList.add('is-authenticated');
     link.href = accountHref;
     link.setAttribute('aria-label', accountLabel);
     link.setAttribute('title', accountLabel);
-
-    if (accountHref === '#') {
-      link.addEventListener('click', (event) => event.preventDefault());
-    }
 
     const text = link.querySelector('[data-account-text]');
     const icon = link.querySelector('[data-account-icon]');
@@ -230,20 +249,24 @@ function markAuthenticatedAccount(user) {
     }
 
     if (icon) {
+      icon.src = avatarSrc;
       icon.hidden = false;
+      icon.classList.toggle('is-avatar', Boolean(user?.avatarUrl));
     }
   });
 
   document.querySelectorAll('[data-mobile-account-link]').forEach((link) => {
     link.classList.add('is-authenticated');
     link.href = accountHref;
-    link.textContent = 'Tài khoản';
+    link.textContent = 'T\u00e0i kho\u1ea3n';
     link.setAttribute('aria-label', accountLabel);
-
-    if (accountHref === '#') {
-      link.addEventListener('click', (event) => event.preventDefault());
-    }
   });
+
+  if (user?.role === 'ADMIN') {
+    document.querySelectorAll('[data-admin-link], [data-mobile-admin-link]').forEach((link) => {
+      link.hidden = false;
+    });
+  }
 }
 
 async function syncAccountState() {

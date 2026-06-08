@@ -1,6 +1,7 @@
 const asyncHandler = require('../../utils/async-handler');
 const { sendSuccess } = require('../../utils/api-response');
 const authService = require('./auth.service');
+const usersService = require('../users/users.service');
 const {
   getUserFromRequest,
   serializeAuthCookie,
@@ -36,9 +37,11 @@ const logout = asyncHandler(async (_req, res) => {
 });
 
 const me = asyncHandler(async (req, res) => {
+  const user = await usersService.getCurrentUser(req.user.id);
+
   sendSuccess(res, {
     data: {
-      user: req.user,
+      user,
     },
   });
 });

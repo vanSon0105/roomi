@@ -6,6 +6,7 @@ const validate = require('../../middlewares/validate.middleware');
 const usersController = require('./users.controller');
 const {
   listUsersSchema,
+  updateCurrentUserSchema,
   updateUserSchema,
   userIdParamSchema,
 } = require('./users.validation');
@@ -15,6 +16,7 @@ const router = express.Router();
 router.use(authMiddleware);
 
 router.get('/me', usersController.getCurrentUser);
+router.patch('/me', validate(updateCurrentUserSchema), usersController.updateCurrentUser);
 
 router.use(adminMiddleware);
 

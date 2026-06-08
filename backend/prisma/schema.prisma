@@ -43,6 +43,8 @@ model User {
   name      String
   email     String    @unique
   phone     String?   @unique
+  avatarUrl String?   @db.VarChar(500)
+  birthday  DateTime? @db.Date
   password  String
   role      Role      @default(USER)
   cart      Cart?

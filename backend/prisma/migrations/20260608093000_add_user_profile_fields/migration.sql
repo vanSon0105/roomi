@@ -1,0 +1,3 @@
+ALTER TABLE `users`
+  ADD COLUMN `avatarUrl` VARCHAR(500) NULL,
+  ADD COLUMN `birthday` DATE NULL;

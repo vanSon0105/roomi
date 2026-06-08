@@ -38,6 +38,15 @@ const updateUser = asyncHandler(async (req, res) => {
   });
 });
 
+const updateCurrentUser = asyncHandler(async (req, res) => {
+  const data = await usersService.updateUser(req.user.id, req.validated.body);
+
+  sendSuccess(res, {
+    message: 'Current user updated successfully',
+    data,
+  });
+});
+
 const deleteUser = asyncHandler(async (req, res) => {
   const data = await usersService.deleteUser(req.validated.params.id);
 
@@ -52,5 +61,6 @@ module.exports = {
   getCurrentUser,
   getUserById,
   getUsers,
+  updateCurrentUser,
   updateUser,
 };

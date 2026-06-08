@@ -184,6 +184,40 @@ button {
   object-fit: contain;
 }
 
+.nav-icon i {
+  font-size: 28px;
+}
+
+.nav-admin-link {
+  width: auto;
+  min-width: 92px;
+  height: 42px;
+  gap: 8px;
+  padding: 0 15px;
+  border: 1px solid rgba(240, 240, 232, 0.9);
+  border-radius: 999px;
+  background: var(--cream);
+  color: var(--maroon);
+  box-shadow: 0 12px 28px rgba(18, 0, 0, 0.18);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.nav-admin-link::after {
+  content: "Admin";
+}
+
+.nav-admin-link i {
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.desktop-nav .nav-admin-link:hover {
+  color: var(--maroon);
+  background: #fff;
+  box-shadow: 0 16px 34px rgba(18, 0, 0, 0.24);
+}
+
 .nav-account.is-authenticated {
   width: 28px;
   height: 28px;
@@ -195,6 +229,16 @@ button {
 
 .nav-account-icon[hidden] {
   display: none;
+}
+
+.nav-account-icon.is-avatar {
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+.nav-admin-link[hidden],
+[data-mobile-admin-link][hidden] {
+  display: none !important;
 }
 
 .menu-trigger {
@@ -1132,6 +1176,147 @@ button {
 .auth-page[data-page="register"] .auth-notice {
   min-height: 0;
   font-size: clamp(0.9rem, 1.7dvh, 1.1rem);
+}
+
+.account-page {
+  padding: clamp(58px, 8vw, 104px) 0 110px;
+}
+
+.account-title p {
+  max-width: 620px;
+  margin: 18px auto 0;
+  color: rgba(80, 0, 0, 0.68);
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+  line-height: 1.35;
+  text-align: center;
+}
+
+.account-shell {
+  width: min(100%, 1040px);
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 22px;
+  margin: 64px auto 0;
+}
+
+.account-summary,
+.account-form {
+  border: 1px solid rgba(80, 0, 0, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 248, 248, 0.72);
+  box-shadow: 0 18px 44px rgba(80, 0, 0, 0.08);
+}
+
+.account-summary {
+  min-height: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 28px;
+  text-align: center;
+}
+
+.account-avatar-preview {
+  width: 136px;
+  height: 136px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  margin-bottom: 14px;
+  border: 7px solid rgba(80, 0, 0, 0.08);
+  border-radius: 999px;
+  background: var(--cream);
+  color: var(--maroon);
+}
+
+.account-avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.account-avatar-preview i {
+  font-size: 72px;
+}
+
+.account-summary strong {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--maroon);
+  font-size: 1.45rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-summary span,
+.account-summary small,
+.account-notice {
+  color: rgba(80, 0, 0, 0.62);
+  font-family: var(--copy);
+}
+
+.account-summary small {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(80, 0, 0, 0.08);
+  font-weight: 800;
+}
+
+.account-logout {
+  min-height: 42px;
+  margin-top: 16px;
+  padding: 0 20px;
+  border: 1px solid rgba(80, 0, 0, 0.22);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--maroon);
+  font-weight: 900;
+  transition:
+    transform 420ms var(--fluid),
+    background 420ms var(--fluid);
+}
+
+.account-logout:hover {
+  background: rgba(80, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.account-logout:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.account-form {
+  display: grid;
+  gap: 18px;
+  padding: clamp(22px, 4vw, 34px);
+}
+
+.account-form label {
+  display: grid;
+  gap: 8px;
+}
+
+.account-form label span {
+  font-weight: 900;
+}
+
+.account-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+}
+
+.account-actions .btn:disabled {
+  cursor: wait;
+  opacity: 0.72;
 }
 
 .detail-grid {
@@ -3303,9 +3488,33 @@ body.checkout-payment-page .payment-actions .btn:disabled {
 }
 
 .admin-brand {
-  width: 142px;
+  min-height: 150px;
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  padding: 18px;
+  border: 1px solid rgba(255, 248, 248, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 248, 248, 0.08);
+}
+
+.admin-brand img {
+  width: 128px;
+}
+
+.admin-brand span {
+  min-height: 26px;
   display: inline-flex;
-  margin: 0 auto 10px;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(255, 248, 248, 0.12);
+  color: rgba(240, 240, 232, 0.78);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
 }
 
 .admin-nav {
@@ -3313,8 +3522,7 @@ body.checkout-payment-page .payment-actions .btn:disabled {
   gap: 8px;
 }
 
-.admin-nav a,
-.admin-shop-link {
+.admin-nav a{
   min-height: 46px;
   display: flex;
   align-items: center;
@@ -3330,20 +3538,14 @@ body.checkout-payment-page .payment-actions .btn:disabled {
 }
 
 .admin-nav a:hover,
-.admin-shop-link:hover,
 .admin-nav a.is-active {
   background: rgba(255, 248, 248, 0.12);
   color: #fff;
   transform: translateX(3px);
 }
 
-.admin-nav i,
-.admin-shop-link i {
+.admin-nav i{
   font-size: 21px;
-}
-
-.admin-shop-link {
-  margin-top: auto;
 }
 
 .admin-main {
@@ -3903,6 +4105,10 @@ body.checkout-payment-page .payment-actions .btn:disabled {
 }
 
 @media (max-width: 1180px) {
+  .account-shell {
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+
   .admin-stat-grid,
   .admin-grid-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3938,31 +4144,32 @@ body.checkout-payment-page .payment-actions .btn:disabled {
   }
 
   .admin-brand {
-    width: 112px;
+    min-height: 96px;
+    width: 140px;
     margin: 0;
+    padding: 12px;
+  }
+
+  .admin-brand img {
+    width: 92px;
+  }
+
+  .admin-brand span {
+    display: none;
   }
 
   .admin-nav {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .admin-nav a,
-  .admin-shop-link {
+  .admin-nav a {
     justify-content: center;
     min-height: 42px;
     padding: 0 10px;
   }
 
-  .admin-nav a span,
-  .admin-shop-link span {
+  .admin-nav a span{
     display: none;
-  }
-
-  .admin-shop-link {
-    position: absolute;
-    top: 18px;
-    right: 18px;
-    margin: 0;
   }
 
   .admin-topbar,
@@ -3985,6 +4192,14 @@ body.checkout-payment-page .payment-actions .btn:disabled {
   .admin-page-head h1 {
     font-size: clamp(44px, 18vw, 72px);
   }
+
+  .account-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .account-summary {
+    min-height: auto;
+  }
 }
 
 @media (max-width: 560px) {
@@ -4005,5 +4220,18 @@ body.checkout-payment-page .payment-actions .btn:disabled {
   .admin-rank-row,
   .admin-list-row {
     grid-template-columns: 1fr;
+  }
+
+  .account-shell {
+    margin-top: 42px;
+  }
+
+  .account-avatar-preview {
+    width: 112px;
+    height: 112px;
+  }
+
+  .account-actions .btn {
+    width: 100%;
   }
 }

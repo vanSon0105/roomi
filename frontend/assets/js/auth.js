@@ -28,7 +28,7 @@ form?.addEventListener('submit', async (event) => {
       const confirmPassword = formData.get('confirmPassword')?.toString() || '';
 
       if (password !== confirmPassword) {
-        throw new Error('Máº­t kháº©u nháº­p láº¡i khÃ´ng khá»›p');
+        throw new Error('Mật khẩu nhập lại không khớp');
       }
 
       await apiFetch('/auth/register', {
@@ -56,8 +56,8 @@ form?.addEventListener('submit', async (event) => {
 
     if (notice) {
       notice.textContent = page === 'register'
-        ? 'ÄÄƒng kÃ½ thÃ nh cÃ´ng, Ä‘ang chuyá»ƒn trang...'
-        : 'ÄÄƒng nháº­p thÃ nh cÃ´ng, Ä‘ang chuyá»ƒn trang...';
+        ? 'Đăng ký thành công, đang chuyển trang...'
+        : 'Đăng nhập thành công, đang chuyển trang...';
     }
 
     window.location.href = safeRedirect;

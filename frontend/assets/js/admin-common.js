@@ -140,8 +140,9 @@ export function renderAdminShell(activePage = '') {
 
   if (sidebar) {
     sidebar.innerHTML = `
-      <a class="admin-brand" href="../../index.html" aria-label="ROOMI trang chủ">
-        <img src="../../assets/images/figma/logo-roomi-footer.png" alt="ROOMI">
+      <a class="admin-brand" href="../../index.html" aria-label="ROOMI Admin">
+        <img src="../../assets/images/figma/logo-roomi-navbar.png" alt="ROOMI">
+        <span>Admin</span>
       </a>
       <nav class="admin-nav" aria-label="Quản trị">
         ${adminNav
@@ -155,10 +156,6 @@ export function renderAdminShell(activePage = '') {
           )
           .join('')}
       </nav>
-      <a class="admin-shop-link" href="../../index.html">
-        <i class="ph ph-arrow-square-out" aria-hidden="true"></i>
-        <span>Trang shop</span>
-      </a>
     `;
   }
 

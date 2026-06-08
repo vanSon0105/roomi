@@ -5,6 +5,8 @@ const safeUserSelect = {
   name: true,
   email: true,
   phone: true,
+  avatarUrl: true,
+  birthday: true,
   role: true,
   createdAt: true,
   updatedAt: true,

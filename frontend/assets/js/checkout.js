@@ -166,7 +166,7 @@ function renderOrderPayment(order, { successView = false } = {}) {
 
   const payment = order.payment || {};
   const qrMarkup = payment.qrUrl
-    ? `<img class="vietqr-image" src="${escapeHtml(payment.qrUrl)}" alt="QR chuyá»ƒn khoáº£n Ä‘Æ¡n ${escapeHtml(order.code)}">`
+    ? `<img class="vietqr-image" src="${escapeHtml(payment.qrUrl)}" alt="QR chuyển khoản cho đơn hàng ${escapeHtml(order.code)}">`
     : `
       <div class="vietqr-missing">
         <strong>Chưa cấu hình tài khoản nhận tiền</strong>

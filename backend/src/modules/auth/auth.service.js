@@ -6,6 +6,11 @@ const usersRepository = require('../users/users.repository');
 const { signToken } = require('./auth-token');
 
 const protectedPages = {
+  'account.html': {
+    page: 'account',
+    message: 'H?y ??ng nh?p ?? xem t?i kho?n',
+    roles: ['USER', 'ADMIN'],
+  },
   'cart.html': {
     page: 'cart',
     message: 'Hãy đăng nhập để xem giỏ hàng',

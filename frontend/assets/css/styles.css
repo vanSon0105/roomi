@@ -1177,6 +1177,153 @@ button {
   gap: 28px;
 }
 
+.modal-open {
+  overflow: hidden;
+}
+
+.buy-now-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.buy-now-modal.is-open {
+  display: flex;
+}
+
+.buy-now-overlay {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(28, 0, 0, 0.52);
+  backdrop-filter: blur(3px);
+}
+
+.buy-now-sheet {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 560px);
+  padding: 28px;
+  border-radius: 18px;
+  background: var(--cream-2);
+  color: var(--maroon);
+  box-shadow: 0 28px 72px rgba(28, 0, 0, 0.34);
+  transform: translateY(16px) scale(0.98);
+  animation: buy-now-in 420ms var(--fluid) forwards;
+}
+
+.buy-now-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(80, 0, 0, 0.08);
+  color: var(--maroon);
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.buy-now-summary {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 18px;
+  align-items: center;
+  padding-right: 36px;
+}
+
+.buy-now-summary h2 {
+  margin: 0;
+  font-size: clamp(1.25rem, 2.4vw, 1.85rem);
+  line-height: 1.18;
+}
+
+.buy-now-summary strong {
+  display: block;
+  margin-top: 8px;
+  color: var(--gold);
+  font-size: 1.45rem;
+}
+
+.buy-now-summary p {
+  margin: 4px 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.buy-now-control {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-top: 28px;
+  padding-block: 22px;
+  border-top: 1px solid rgba(80, 0, 0, 0.16);
+  border-bottom: 1px solid rgba(80, 0, 0, 0.16);
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+
+.buy-now-stepper {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid var(--maroon);
+  border-radius: 10px;
+  background: var(--cream);
+}
+
+.buy-now-stepper button,
+.buy-now-stepper input {
+  width: 48px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--maroon);
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.buy-now-stepper button {
+  transition: background 300ms var(--fluid);
+}
+
+.buy-now-stepper button:hover {
+  background: rgba(80, 0, 0, 0.1);
+}
+
+.buy-now-stepper input {
+  width: 64px;
+  border-inline: 1px solid rgba(80, 0, 0, 0.28);
+  outline: 0;
+}
+
+.buy-now-notice {
+  min-height: 22px;
+  margin: 14px 0 0;
+  color: var(--maroon);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.buy-now-confirm {
+  width: 100%;
+  min-height: 54px;
+  margin-top: 8px;
+}
+
+@keyframes buy-now-in {
+  to {
+    transform: translateY(0) scale(1);
+  }
+}
+
 .description {
   padding-bottom: 90px;
   border-bottom: 2px solid var(--maroon);
@@ -1237,6 +1384,45 @@ button {
   gap: 20px;
 }
 
+.cart-row-controls {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+}
+
+.select-button {
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--maroon);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cream);
+  transition: background 300ms var(--fluid), box-shadow 300ms var(--fluid), transform 300ms var(--fluid);
+}
+
+.select-button::after {
+  content: "";
+  display: block;
+  width: 8px;
+  height: 8px;
+  margin: auto;
+  border-radius: 999px;
+  background: transparent;
+}
+
+.select-button.is-selected {
+  background: var(--maroon);
+  box-shadow: 0 0 0 5px rgba(80, 0, 0, 0.1);
+}
+
+.select-button.is-selected::after {
+  background: var(--cream);
+}
+
+.select-button:hover {
+  transform: scale(1.08);
+}
+
 .remove-button {
   border: 0;
   background: transparent;
@@ -1286,6 +1472,11 @@ button {
   color: var(--cream);
   font-size: 20px;
   font-weight: 900;
+}
+
+.cart-summary .btn.is-disabled {
+  pointer-events: none;
+  opacity: 0.55;
 }
 
 .checkout-title-row {
@@ -1406,11 +1597,6 @@ button {
   transform: none;
 }
 
-.payment-choice.is-active {
-  background: var(--maroon);
-  color: var(--cream);
-}
-
 .checkout-notice {
   width: 100%;
   margin: -4px 0 0;
@@ -1450,6 +1636,10 @@ body.checkout-form-page .payment-row {
 
 body.checkout-form-page .payment-row button {
   min-height: clamp(44px, 6dvh, 52px);
+}
+
+body.checkout-form-page .payment-submit {
+  min-width: min(100%, 360px);
 }
 
 .checkout-review {
@@ -2953,6 +3143,37 @@ body.checkout-payment-page .payment-actions .btn:disabled {
   .payment-row {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .buy-now-modal {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .buy-now-sheet {
+    width: 100%;
+    padding: 24px 18px 20px;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .buy-now-summary {
+    grid-template-columns: 76px 1fr;
+    gap: 14px;
+  }
+
+  .buy-now-control {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .buy-now-stepper {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .buy-now-stepper button {
+    flex: 1;
   }
 
   .payment-info-card h2 {

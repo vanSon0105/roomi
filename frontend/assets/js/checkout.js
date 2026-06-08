@@ -6,6 +6,33 @@ renderShell('cart');
 const root = document.querySelector('#checkoutRoot');
 const mode = document.body.dataset.checkout || 'form';
 const previewShipping = 30000;
+const SELECTED_CART_STORAGE_KEY = 'roomi_selected_cart_items';
+
+function readSelectedCartItemIds() {
+  const raw = sessionStorage.getItem(SELECTED_CART_STORAGE_KEY);
+
+  if (raw == null) {
+    return null;
+  }
+
+  try {
+    const ids = JSON.parse(raw);
+    return (Array.isArray(ids) ? ids : []).map(Number).filter(Number.isFinite);
+  } catch (_error) {
+    return null;
+  }
+}
+
+function getCheckoutItems(cart) {
+  const selectedIds = readSelectedCartItemIds();
+
+  if (!selectedIds) {
+    return cart.items;
+  }
+
+  const selectedIdSet = new Set(selectedIds);
+  return cart.items.filter((item) => selectedIdSet.has(item.id));
+}
 
 function setPaymentLayout(isActive) {
   document.body.classList.toggle('checkout-payment-page', isActive);
@@ -95,6 +122,7 @@ function bindReportPaidButton() {
         method: 'POST',
       });
 
+      sessionStorage.removeItem(SELECTED_CART_STORAGE_KEY);
       renderOrderPayment(response.data, { successView: true });
     } catch (error) {
       button.disabled = false;
@@ -187,6 +215,7 @@ function getFormPayload(form) {
     email: formData.get('email')?.toString() || '',
     address: formData.get('address')?.toString() || '',
     note: formData.get('note')?.toString() || '',
+    cartItemIds: readSelectedCartItemIds() || undefined,
   };
 }
 
@@ -221,7 +250,7 @@ function bindCheckoutForm() {
 
       if (submitButton) {
         submitButton.disabled = false;
-        submitButton.textContent = 'Tạo mã QR thanh toán';
+        submitButton.textContent = 'Chuyển khoản VietQR';
       }
     }
   });
@@ -236,10 +265,26 @@ function renderCheckout(cart) {
     return;
   }
 
+  const checkoutItems = getCheckoutItems(cart);
+
+  if (checkoutItems.length === 0) {
+    root.innerHTML = `
+      <section class="locked-state container reveal">
+        <div>
+          <h1>Chưa chọn sản phẩm</h1>
+          <p>Quay lại giỏ hàng và tick vào sản phẩm bạn muốn thanh toán trước.</p>
+          <a class="btn btn-maroon" href="cart.html">Quay lại giỏ hàng</a>
+        </div>
+      </section>
+    `;
+    observeReveal();
+    return;
+  }
+
   const shippingFee = Number.isFinite(Number(cart.shippingFee)) ? Number(cart.shippingFee) : previewShipping;
-  const total = Number.isFinite(Number(cart.checkoutTotal))
-    ? Number(cart.checkoutTotal)
-    : cart.subtotal + shippingFee;
+  const subtotal = checkoutItems.reduce((sum, item) => sum + item.total, 0);
+  const total = subtotal + shippingFee;
+  const itemCount = checkoutItems.reduce((sum, item) => sum + item.quantity, 0);
 
   root.innerHTML = `
     <section class="checkout-band checkout-form-band reveal">
@@ -254,8 +299,7 @@ function renderCheckout(cart) {
 
           <div class="payment-row">
             <span>Thanh toán</span>
-            <button class="payment-choice is-active" type="button">Chuyển khoản VietQR</button>
-            <button class="btn btn-maroon" type="submit">Tạo mã QR thanh toán</button>
+            <button class="btn btn-maroon payment-submit" type="submit">Chuyển khoản VietQR</button>
             <p class="checkout-notice" data-checkout-notice></p>
           </div>
         </form>
@@ -265,10 +309,10 @@ function renderCheckout(cart) {
     <section class="checkout-review container reveal">
       <div class="checkout-review-head">
         <h2>Sản phẩm trong đơn</h2>
-        <span>${cart.itemCount} sản phẩm</span>
+        <span>${itemCount} sản phẩm</span>
       </div>
       <div class="checkout-product">
-        ${cart.items
+        ${checkoutItems
           .map(
             (item) => `
               <div class="checkout-row">
@@ -356,4 +400,3 @@ async function init() {
 }
 
 init();
-

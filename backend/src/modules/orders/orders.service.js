@@ -32,7 +32,18 @@ const createOrder = async (userId, payload) => {
       throw new AppError('Cart is empty', 400);
     }
 
-    const unavailableItem = cart.items.find(
+    const selectedCartItemIds = Array.isArray(payload.cartItemIds)
+      ? new Set(payload.cartItemIds.map(Number))
+      : null;
+    const checkoutItems = selectedCartItemIds
+      ? cart.items.filter((item) => selectedCartItemIds.has(item.id))
+      : cart.items;
+
+    if (checkoutItems.length === 0) {
+      throw new AppError('No selected cart items found', 400);
+    }
+
+    const unavailableItem = checkoutItems.find(
       (item) => item.product.status !== 'ACTIVE' || item.product.stock < item.quantity,
     );
 
@@ -41,7 +52,7 @@ const createOrder = async (userId, payload) => {
     }
 
     const orderCode = generateOrderCode();
-    const subtotal = cart.items.reduce(
+    const subtotal = checkoutItems.reduce(
       (sum, item) => sum + toNumber(item.product.price) * item.quantity,
       0,
     );
@@ -70,7 +81,7 @@ const createOrder = async (userId, payload) => {
           note: payload.note,
         }),
         items: {
-          create: cart.items.map((item) => {
+          create: checkoutItems.map((item) => {
             const unitPrice = toNumber(item.product.price);
             const totalPrice = unitPrice * item.quantity;
 

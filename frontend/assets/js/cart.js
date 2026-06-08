@@ -4,7 +4,30 @@ import { apiFetch, escapeHtml, miniArt, observeReveal, renderShell } from './com
 renderShell('cart');
 
 const root = document.querySelector('#cartRoot');
+const SELECTED_CART_STORAGE_KEY = 'roomi_selected_cart_items';
 let cart = null;
+let selectedCartItemIds = new Set();
+
+function readSelectedCartItems() {
+  try {
+    const ids = JSON.parse(sessionStorage.getItem(SELECTED_CART_STORAGE_KEY) || '[]');
+    return new Set((Array.isArray(ids) ? ids : []).map(Number).filter(Number.isFinite));
+  } catch (_error) {
+    return new Set();
+  }
+}
+
+function writeSelectedCartItems() {
+  sessionStorage.setItem(SELECTED_CART_STORAGE_KEY, JSON.stringify([...selectedCartItemIds]));
+}
+
+function syncSelectedCartItems() {
+  if (!cart) return;
+
+  const availableIds = new Set(cart.items.map((item) => item.id));
+  selectedCartItemIds = new Set([...selectedCartItemIds].filter((id) => availableIds.has(id)));
+  writeSelectedCartItems();
+}
 
 function renderLoading() {
   if (!root) return;
@@ -45,6 +68,11 @@ function renderCart() {
     return;
   }
 
+  const selectedItems = cart.items.filter((item) => selectedCartItemIds.has(item.id));
+  const selectedSubtotal = selectedItems.reduce((sum, item) => sum + item.total, 0);
+  const selectedCount = selectedItems.reduce((sum, item) => sum + item.quantity, 0);
+  const canCheckout = selectedItems.length > 0;
+
   root.innerHTML = `
     <section class="cart-section container reveal">
       <div class="section-title">
@@ -62,7 +90,16 @@ function renderCart() {
             (item) => `
               <article class="cart-row">
                 <div class="cart-product">
-                  <button class="remove-button" type="button" data-remove="${item.id}" aria-label="Xóa sản phẩm">&times;</button>
+                  <div class="cart-row-controls">
+                    <button
+                      class="select-button ${selectedCartItemIds.has(item.id) ? 'is-selected' : ''}"
+                      type="button"
+                      data-select="${item.id}"
+                      aria-label="${selectedCartItemIds.has(item.id) ? 'Bỏ chọn sản phẩm' : 'Chọn sản phẩm để thanh toán'}"
+                      aria-pressed="${selectedCartItemIds.has(item.id) ? 'true' : 'false'}"
+                    ></button>
+                    <button class="remove-button" type="button" data-remove="${item.id}" aria-label="Xóa sản phẩm">&times;</button>
+                  </div>
                   ${miniArt(item.product.name, item.product.imageUrl)}
                   <strong>${escapeHtml(item.product.name)}</strong>
                 </div>
@@ -78,9 +115,9 @@ function renderCart() {
           )
           .join('')}
         <div class="cart-summary">
-          <span>Tổng cộng</span>
-          <strong>${formatCurrency(cart.subtotal)}</strong>
-          <a class="btn btn-cream" href="checkout.html">Thanh toán</a>
+          <span>${canCheckout ? `Đã chọn ${selectedCount} sản phẩm` : 'Chọn sản phẩm để thanh toán'}</span>
+          <strong>${formatCurrency(selectedSubtotal)}</strong>
+          <a class="btn btn-cream ${canCheckout ? '' : 'is-disabled'}" href="${canCheckout ? 'checkout.html' : '#'}" data-checkout-link aria-disabled="${canCheckout ? 'false' : 'true'}">Thanh toán</a>
         </div>
       </div>
     </section>
@@ -95,6 +132,8 @@ async function loadCart() {
   try {
     const response = await apiFetch('/cart');
     cart = response.data;
+    selectedCartItemIds = readSelectedCartItems();
+    syncSelectedCartItems();
     renderCart();
   } catch (error) {
     renderError(error);
@@ -104,16 +143,43 @@ async function loadCart() {
 async function updateCartFromResponse(promise) {
   const response = await promise;
   cart = response.data;
+  syncSelectedCartItems();
   renderCart();
 }
 
 root?.addEventListener('click', async (event) => {
   const remove = event.target.closest('[data-remove]');
+  const select = event.target.closest('[data-select]');
   const increase = event.target.closest('[data-increase]');
   const decrease = event.target.closest('[data-decrease]');
-  const target = remove || increase || decrease;
+  const checkoutLink = event.target.closest('[data-checkout-link]');
+  const target = remove || select || increase || decrease || checkoutLink;
 
   if (!target || !cart) return;
+
+  if (checkoutLink) {
+    if (selectedCartItemIds.size === 0) {
+      event.preventDefault();
+      return;
+    }
+
+    writeSelectedCartItems();
+    return;
+  }
+
+  if (select) {
+    const itemId = Number(select.dataset.select);
+
+    if (selectedCartItemIds.has(itemId)) {
+      selectedCartItemIds.delete(itemId);
+    } else {
+      selectedCartItemIds.add(itemId);
+    }
+
+    writeSelectedCartItems();
+    renderCart();
+    return;
+  }
 
   target.disabled = true;
 
@@ -140,4 +206,3 @@ root?.addEventListener('click', async (event) => {
 });
 
 loadCart();
-

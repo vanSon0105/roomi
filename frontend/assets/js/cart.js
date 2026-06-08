@@ -1,5 +1,5 @@
-import { formatCurrency } from './data.js';
-import { apiFetch, escapeHtml, miniArt, observeReveal, renderShell } from './common.js?v=nav-public-1';
+﻿import { formatCurrency } from './data.js';
+import { apiFetch, escapeHtml, miniArt, observeReveal, renderShell } from './common.js?v=chat-icon-1';
 
 renderShell('cart');
 
@@ -55,7 +55,7 @@ function renderCart() {
           <span>Sản phẩm</span>
           <span>Giá</span>
           <span>Số lượng</span>
-          <span>Tạm tính</span>
+          <span>Thành tiền</span>
         </div>
         ${cart.items
           .map(
@@ -140,3 +140,4 @@ root?.addEventListener('click', async (event) => {
 });
 
 loadCart();
+

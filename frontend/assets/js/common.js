@@ -1,14 +1,15 @@
 import { formatCurrency } from './data.js';
 
-export const API_BASE =
-  window.ROOMI_API_BASE ||
-  (window.location.protocol.startsWith('http') && window.location.port === '4000'
-    ? '/api'
-    : 'http://localhost:4000/api');
+export const API_BASE = '/api';
+  // window.ROOMI_API_BASE ||
+  // (window.location.protocol.startsWith('http') && window.location.port === '4000'
+  //   ? '/api'
+  //   : 'http://localhost:4000/api');
 
 const rootPrefix = '';
 const cartIconSrc = `${rootPrefix}assets/images/cart-icon.png`;
 const userIconSrc = `${rootPrefix}assets/images/user-icon.png`;
+const chatIconSrc = `${rootPrefix}assets/images/figma/homepage/chat icon.png`;
 
 function active(page, id) {
   return page === id ? 'is-active' : '';
@@ -171,7 +172,7 @@ export function renderShell(page = '') {
   if (chatSlot) {
     chatSlot.innerHTML = `
       <button class="chat-button" type="button" data-chat-button aria-label="Mở chat">
-        <i class="ph-bold ph-headset"></i>
+        <img src="${chatIconSrc}" alt="">
       </button>
       <aside class="chat-panel" data-chat-panel aria-hidden="true">
         <div class="chat-line">

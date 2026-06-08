@@ -17,6 +17,13 @@ const config = {
   authCookieMaxAgeSeconds: Number(process.env.AUTH_COOKIE_MAX_AGE_SECONDS || 7 * 24 * 60 * 60),
   corsOrigin: process.env.CORS_ORIGIN || '*',
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS || 10),
+  checkoutShippingFee: Number(process.env.CHECKOUT_SHIPPING_FEE || 30000),
+  vietqr: {
+    bankId: process.env.VIETQR_BANK_ID || '',
+    accountNo: process.env.VIETQR_ACCOUNT_NO || '',
+    accountName: process.env.VIETQR_ACCOUNT_NAME || '',
+    template: process.env.VIETQR_TEMPLATE || 'compact2',
+  },
 };
 
 if (!Number.isInteger(config.port) || config.port <= 0) {
@@ -25,6 +32,10 @@ if (!Number.isInteger(config.port) || config.port <= 0) {
 
 if (!Number.isInteger(config.bcryptSaltRounds) || config.bcryptSaltRounds < 8) {
   throw new Error('BCRYPT_SALT_ROUNDS must be an integer greater than or equal to 8');
+}
+
+if (!Number.isFinite(config.checkoutShippingFee) || config.checkoutShippingFee < 0) {
+  throw new Error('CHECKOUT_SHIPPING_FEE must be a non-negative number');
 }
 
 if (!Number.isInteger(config.authCookieMaxAgeSeconds) || config.authCookieMaxAgeSeconds <= 0) {

@@ -1,4 +1,4 @@
-import { formatCurrency } from './data.js';
+﻿import { formatCurrency } from './data.js';
 import {
   apiFetch,
   escapeHtml,
@@ -9,7 +9,7 @@ import {
   redirectToLogin,
   renderShell,
   stars,
-} from './common.js?v=nav-public-1';
+} from './common.js?v=chat-icon-1';
 
 renderShell('products');
 
@@ -147,3 +147,4 @@ root?.addEventListener('click', (event) => {
 });
 
 init();
+

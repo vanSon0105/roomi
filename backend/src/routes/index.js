@@ -2,6 +2,7 @@ const express = require('express');
 
 const authRoutes = require('../modules/auth/auth.routes');
 const cartRoutes = require('../modules/cart/cart.routes');
+const ordersRoutes = require('../modules/orders/orders.routes');
 const productsController = require('../modules/products/products.controller');
 const usersRoutes = require('../modules/users/users.routes');
 const productsRoutes = require('../modules/products/products.routes');
@@ -21,6 +22,7 @@ router.get('/health', (_req, res) => {
 
 router.use('/auth', authRoutes);
 router.use('/cart', cartRoutes);
+router.use('/orders', ordersRoutes);
 router.get('/categories', productsController.getCategories);
 router.use('/products', productsRoutes);
 router.use('/users', usersRoutes);

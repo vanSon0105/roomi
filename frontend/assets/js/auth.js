@@ -1,4 +1,4 @@
-import { apiFetch, observeReveal } from './common.js?v=nav-public-1';
+﻿import { apiFetch, observeReveal } from './common.js?v=chat-icon-1';
 
 const form = document.querySelector('[data-auth-form]');
 const notice = document.querySelector('[data-auth-notice]');
@@ -23,7 +23,7 @@ form?.addEventListener('submit', async (event) => {
       const confirmPassword = formData.get('confirmPassword')?.toString() || '';
 
       if (password !== confirmPassword) {
-        throw new Error('Mật khẩu nhập lại không khớp');
+        throw new Error('Máº­t kháº©u nháº­p láº¡i khÃ´ng khá»›p');
       }
 
       await apiFetch('/auth/register', {
@@ -51,8 +51,8 @@ form?.addEventListener('submit', async (event) => {
 
     if (notice) {
       notice.textContent = page === 'register'
-        ? 'Đăng ký thành công, đang chuyển trang...'
-        : 'Đăng nhập thành công, đang chuyển trang...';
+        ? 'ÄÄƒng kÃ½ thÃ nh cÃ´ng, Ä‘ang chuyá»ƒn trang...'
+        : 'ÄÄƒng nháº­p thÃ nh cÃ´ng, Ä‘ang chuyá»ƒn trang...';
     }
 
     window.location.href = safeRedirect;
@@ -64,3 +64,4 @@ form?.addEventListener('submit', async (event) => {
 });
 
 observeReveal();
+

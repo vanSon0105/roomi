@@ -1,4 +1,5 @@
 const { serializeProduct } = require('../products/products.presenter');
+const config = require('../../config/env');
 
 const toNumber = (value) => (value == null ? null : Number(value));
 
@@ -18,11 +19,14 @@ const serializeCart = (cart) => {
   });
 
   const subtotal = items.reduce((sum, item) => sum + item.total, 0);
+  const shippingFee = config.checkoutShippingFee;
 
   return {
     id: cart?.id || null,
     items,
     subtotal,
+    shippingFee,
+    checkoutTotal: subtotal + shippingFee,
     itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
   };
 };

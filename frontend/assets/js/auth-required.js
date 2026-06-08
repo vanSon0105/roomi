@@ -1,3 +1,4 @@
-import { renderShell } from './common.js?v=nav-public-1';
+﻿import { renderShell } from './common.js?v=chat-icon-1';
 
 renderShell(document.body.dataset.authPage || '');
+

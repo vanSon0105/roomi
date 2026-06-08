@@ -84,6 +84,18 @@ to:
 frontend/assets/images/products
 ```
 
+Dynamic VietQR checkout:
+
+```txt
+CHECKOUT_SHIPPING_FEE=30000
+VIETQR_BANK_ID="970422"
+VIETQR_ACCOUNT_NO="113366668888"
+VIETQR_ACCOUNT_NAME="ROOMI DECOR"
+VIETQR_TEMPLATE="compact2"
+```
+
+The order code is used as the unique bank-transfer content. Keep `VIETQR_ACCOUNT_NAME` without Vietnamese accents for best banking-app compatibility.
+
 ## API
 
 Base URL:
@@ -142,6 +154,16 @@ PATCH /cart/items/:itemId
 DELETE /cart/items/:itemId
 ```
 
+Orders:
+
+```txt
+POST /orders
+GET /orders/:code
+POST /orders/:code/report-paid
+```
+
+`POST /orders` creates a pending bank-transfer order and QR, but keeps the cart unchanged. `POST /orders/:code/report-paid` records that the customer clicked "Tôi đã chuyển khoản" and removes only the ordered product quantities from the cart. The order still remains `paymentStatus=UNPAID` until admin/bank reconciliation confirms the money.
+
 Users:
 
 ```txt
@@ -169,3 +191,8 @@ Success response format:
   "data": {}
 }
 ```
+
+
+ngrok http --domain=unrevengefully-preburlesque-odelia.ngrok-free.dev 4000
+
+https://unrevengefully-preburlesque-odelia.ngrok-free.dev

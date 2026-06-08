@@ -1,4 +1,5 @@
-import { observeReveal, renderShell } from './common.js?v=nav-public-1';
+﻿import { observeReveal, renderShell } from './common.js?v=chat-icon-1';
 
 renderShell('about');
 observeReveal();
+

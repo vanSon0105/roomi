@@ -1,4 +1,4 @@
-import { apiFetch, escapeHtml, observeReveal, productCard, renderShell } from './common.js?v=nav-public-1';
+﻿import { apiFetch, escapeHtml, observeReveal, productCard, renderShell } from './common.js?v=chat-icon-1';
 
 renderShell('products');
 
@@ -94,3 +94,4 @@ pillRoot?.addEventListener('click', async (event) => {
 });
 
 init();
+

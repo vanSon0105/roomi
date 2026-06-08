@@ -1116,8 +1116,7 @@ button {
   font-weight: 600;
 }
 
-.auth-switch,
-.auth-notice {
+.auth-switch {
   margin: 0;
   color: var(--cream);
   font-size: clamp(1.45rem, 1.5vw, 1.95rem);
@@ -1131,9 +1130,32 @@ button {
 }
 
 .auth-notice {
-  min-height: 1.2em;
-  font-size: clamp(1rem, 1.1vw, 1.35rem);
-  opacity: 0.82;
+  display: none;
+  width: min(100%, 840px);
+  margin: clamp(12px, 1.25vw, 22px) auto 0;
+  color: rgba(255, 248, 248, 0.82);
+  font-family: var(--copy);
+  font-size: clamp(1.05rem, 1.1vw, 1.35rem);
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: center;
+  white-space: pre-line;
+}
+
+.auth-notice:not(:empty) {
+  display: block;
+}
+
+.auth-notice.is-error {
+  color: #f0c8c8;
+}
+
+.auth-notice.is-success {
+  color: #fff8f8;
+}
+
+.auth-notice:not(:empty) + .auth-form {
+  margin-top: clamp(24px, 2.1vw, 42px);
 }
 
 .auth-page[data-page="register"] .auth-logo {
@@ -1174,8 +1196,11 @@ button {
 }
 
 .auth-page[data-page="register"] .auth-notice {
-  min-height: 0;
   font-size: clamp(0.9rem, 1.7dvh, 1.1rem);
+}
+
+.auth-page[data-page="register"] .auth-notice:not(:empty) + .auth-form-register {
+  margin-top: clamp(12px, 2dvh, 22px);
 }
 
 .account-page {

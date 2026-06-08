@@ -1306,6 +1306,62 @@ button {
   font-weight: 900;
 }
 
+.account-avatar-picker input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.account-avatar-picker {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: -6px 0 10px;
+  padding: 0 18px;
+  border: 1px solid rgba(80, 0, 0, 0.22);
+  border-radius: 999px;
+  background: var(--cream);
+  color: var(--maroon);
+  cursor: pointer;
+  font-weight: 900;
+  transition:
+    color 420ms var(--fluid),
+    background 420ms var(--fluid),
+    box-shadow 420ms var(--fluid),
+    transform 420ms var(--fluid);
+}
+
+.account-avatar-picker:hover {
+  background: rgba(80, 0, 0, 0.08);
+  color: var(--cream);
+  box-shadow: 0 12px 28px rgba(80, 0, 0, 0.14);
+  transform: translateY(-1px);
+}
+
+.account-avatar-file-name {
+  max-width: 230px;
+  margin: -2px 0 4px;
+  overflow: hidden;
+  color: rgba(80, 0, 0, 0.58);
+  font-family: var(--copy);
+  font-size: 0.9rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-avatar-file-name[hidden] {
+  display: none;
+}
+
+.account-readonly-input {
+  cursor: not-allowed;
+  color: rgba(80, 0, 0, 0.68);
+}
+
 .account-actions {
   display: flex;
   align-items: center;
@@ -3843,7 +3899,7 @@ body.checkout-payment-page .payment-actions .btn:disabled {
   background: rgba(255, 255, 255, 0.65);
   color: var(--maroon);
   padding: 0 12px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .admin-table {

@@ -2,6 +2,7 @@ const express = require('express');
 
 const adminMiddleware = require('../../middlewares/admin.middleware');
 const authMiddleware = require('../../middlewares/auth.middleware');
+const avatarUploadMiddleware = require('../../middlewares/avatar-upload.middleware');
 const validate = require('../../middlewares/validate.middleware');
 const usersController = require('./users.controller');
 const {
@@ -17,6 +18,7 @@ router.use(authMiddleware);
 
 router.get('/me', usersController.getCurrentUser);
 router.patch('/me', validate(updateCurrentUserSchema), usersController.updateCurrentUser);
+router.post('/me/avatar', avatarUploadMiddleware, usersController.uploadCurrentUserAvatar);
 
 router.use(adminMiddleware);
 

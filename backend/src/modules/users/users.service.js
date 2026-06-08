@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 
 const config = require('../../config/env');
 const AppError = require('../../utils/app-error');
+const { deleteLocalAvatar } = require('../../utils/avatar-storage');
 const usersRepository = require('./users.repository');
 
 const getUsers = (query) => usersRepository.findAll(query);
@@ -50,6 +51,22 @@ const updateUser = async (id, data) => {
   return usersRepository.update(id, updateData);
 };
 
+const updateCurrentUserAvatar = async (id, avatarUrl) => {
+  const existingUser = await usersRepository.findById(id);
+
+  if (!existingUser) {
+    throw new AppError('User not found', 404);
+  }
+
+  const updatedUser = await usersRepository.update(id, { avatarUrl });
+
+  if (existingUser.avatarUrl !== avatarUrl) {
+    await deleteLocalAvatar(existingUser.avatarUrl).catch(() => {});
+  }
+
+  return updatedUser;
+};
+
 const deleteUser = async (id) => {
   const existingUser = await usersRepository.findById(id);
 
@@ -65,5 +82,6 @@ module.exports = {
   getCurrentUser,
   getUserById,
   getUsers,
+  updateCurrentUserAvatar,
   updateUser,
 };

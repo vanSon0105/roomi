@@ -1,8 +1,9 @@
-import { apiFetch, escapeHtml, mediaUrl, observeReveal, renderShell } from './common.js?v=pages-path-1';
+import { API_BASE, apiFetch, escapeHtml, mediaUrl, observeReveal, renderShell } from './common.js?v=pages-path-1';
 
 renderShell('account');
 
 const root = document.querySelector('#accountRoot');
+let avatarPreviewObjectUrl = null;
 
 function dateInputValue(value) {
   if (!value) return '';
@@ -17,7 +18,7 @@ function avatarMarkup(user) {
   const avatarSrc = user.avatarUrl ? mediaUrl(user.avatarUrl) : '';
 
   return `
-    <div class="account-avatar-preview" data-avatar-preview>
+    <div class="account-avatar-preview" data-avatar-preview data-current-avatar="${escapeHtml(avatarSrc)}">
       ${
         avatarSrc
           ? `<img src="${escapeHtml(avatarSrc)}" alt="${escapeHtml(user.name || 'Avatar')}">`
@@ -57,6 +58,11 @@ function renderAccount(user) {
       <div class="account-shell">
         <aside class="account-summary">
           ${avatarMarkup(user)}
+          <label class="account-avatar-picker">
+            <input name="avatar" type="file" accept="image/jpeg,image/png,image/webp,image/gif" data-avatar-file>
+            <span>Thay đổi ảnh</span>
+          </label>
+          <p class="account-avatar-file-name" data-avatar-file-name hidden></p>
           <strong>${escapeHtml(user.name || 'ROOMI user')}</strong>
           <span>${escapeHtml(user.email || '')}</span>
           <small>${escapeHtml(user.role === 'ADMIN' ? 'Admin' : 'Khách hàng')}</small>
@@ -73,12 +79,12 @@ function renderAccount(user) {
             <input class="roomi-input" name="phone" type="tel" value="${escapeHtml(user.phone || '')}">
           </label>
           <label>
-            <span>Ngày sinh</span>
-            <input class="roomi-input" name="birthday" type="date" value="${dateInputValue(user.birthday)}">
+            <span>Email</span>
+            <input class="roomi-input account-readonly-input" name="email" type="email" value="${escapeHtml(user.email || '')}" readonly aria-readonly="true">
           </label>
           <label>
-            <span>Ảnh đại diện</span>
-            <input class="roomi-input" name="avatarUrl" value="${escapeHtml(user.avatarUrl || '')}" placeholder="link ảnh đại diện">
+            <span>Ngày sinh</span>
+            <input class="roomi-input" name="birthday" type="date" value="${dateInputValue(user.birthday)}">
           </label>
           <div class="account-actions">
             <button class="btn btn-maroon" type="submit">Lưu thay đổi</button>
@@ -94,15 +100,72 @@ function renderAccount(user) {
 }
 
 function bindFormPreview() {
-  const input = root?.querySelector('[name="avatarUrl"]');
+  const input = root?.querySelector('[data-avatar-file]');
   const preview = root?.querySelector('[data-avatar-preview]');
+  const fileName = root?.querySelector('[data-avatar-file-name]');
 
-  input?.addEventListener('input', () => {
-    const value = input.value.trim();
-    preview.innerHTML = value
-      ? `<img src="${escapeHtml(mediaUrl(value))}" alt="Avatar preview">`
-      : '<i class="ph-fill ph-user"></i>';
+  if (avatarPreviewObjectUrl) {
+    URL.revokeObjectURL(avatarPreviewObjectUrl);
+    avatarPreviewObjectUrl = null;
+  }
+
+  input?.addEventListener('change', () => {
+    const file = input.files?.[0];
+
+    if (avatarPreviewObjectUrl) {
+      URL.revokeObjectURL(avatarPreviewObjectUrl);
+      avatarPreviewObjectUrl = null;
+    }
+
+    if (!file) {
+      const currentAvatar = preview?.dataset.currentAvatar || '';
+
+      if (preview) {
+        preview.innerHTML = currentAvatar
+          ? `<img src="${escapeHtml(currentAvatar)}" alt="Avatar preview">`
+          : '<i class="ph-fill ph-user"></i>';
+      }
+
+      if (fileName) {
+        fileName.textContent = '';
+        fileName.hidden = true;
+      }
+      return;
+    }
+
+    avatarPreviewObjectUrl = URL.createObjectURL(file);
+
+    if (preview) {
+      preview.innerHTML = `<img src="${escapeHtml(avatarPreviewObjectUrl)}" alt="Avatar preview">`;
+    }
+
+    if (fileName) {
+      fileName.textContent = file.name;
+      fileName.hidden = false;
+    }
   });
+}
+
+async function uploadAvatar(file) {
+  const body = new FormData();
+  body.append('avatar', file);
+
+  const response = await fetch(`${API_BASE}/users/me/avatar`, {
+    method: 'POST',
+    credentials: 'include',
+    body,
+  });
+
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const error = new Error(payload?.message || 'Không tải được ảnh đại diện.');
+    error.status = response.status;
+    error.data = payload?.data || null;
+    throw error;
+  }
+
+  return payload;
 }
 
 async function loadAccount() {
@@ -130,25 +193,36 @@ root?.addEventListener('submit', async (event) => {
   const button = form.querySelector('[type="submit"]');
   const notice = form.querySelector('[data-account-notice]');
   const formData = new FormData(form);
+  const avatarFile = root?.querySelector('[data-avatar-file]')?.files?.[0] || null;
   const payload = {
     name: formData.get('name')?.toString().trim() || '',
     phone: formData.get('phone')?.toString().trim() || null,
     birthday: formData.get('birthday')?.toString() || null,
-    avatarUrl: formData.get('avatarUrl')?.toString().trim() || null,
   };
 
   if (notice) notice.textContent = '';
+
+  if (avatarFile && avatarFile.size > 3 * 1024 * 1024) {
+    if (notice) notice.textContent = 'Ảnh đại diện tối đa 3MB.';
+    return;
+  }
+
   if (button) {
     button.disabled = true;
     button.textContent = 'Đang lưu...';
   }
 
   try {
-    const response = await apiFetch('/users/me', {
+    let response = await apiFetch('/users/me', {
       method: 'PATCH',
       body: JSON.stringify(payload),
     });
 
+    if (avatarFile) {
+      response = await uploadAvatar(avatarFile);
+    }
+
+    renderShell('account');
     renderAccount(response.data);
     const nextNotice = root?.querySelector('[data-account-notice]');
     if (nextNotice) nextNotice.textContent = 'Đã cập nhật tài khoản.';

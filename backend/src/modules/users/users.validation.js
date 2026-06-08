@@ -36,7 +36,6 @@ const updateCurrentUserSchema = z.object({
     .object({
       name: z.string().trim().min(2).max(100).optional(),
       phone: z.preprocess(emptyToNull, z.string().trim().min(8).max(20).nullable().optional()),
-      avatarUrl: z.preprocess(emptyToNull, z.string().trim().max(500).nullable().optional()),
       birthday: z.preprocess(emptyToNull, z.coerce.date().nullable().optional()),
     })
     .refine((data) => Object.keys(data).length > 0, {

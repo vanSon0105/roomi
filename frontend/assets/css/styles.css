@@ -806,11 +806,14 @@ button {
   margin-top: 64px;
   display: flex;
   justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 18px;
   font-size: 18px;
   font-weight: 900;
 }
 
+.pager button,
 .pager span {
   width: 34px;
   height: 34px;
@@ -819,9 +822,34 @@ button {
   border-radius: 999px;
 }
 
+.pager button {
+  border: 1px solid rgba(80, 0, 0, 0.24);
+  background: transparent;
+  color: var(--maroon);
+  transition:
+    transform 420ms var(--fluid),
+    background 420ms var(--fluid),
+    color 420ms var(--fluid);
+}
+
+.pager button:hover:not(:disabled),
 .pager .active {
   background: var(--maroon);
   color: var(--cream);
+  transform: translateY(-2px);
+}
+
+.pager button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.pager-gap {
+  color: rgba(80, 0, 0, 0.48);
+}
+
+.product-pager:empty {
+  display: none;
 }
 
 .room-preview {
@@ -1398,6 +1426,120 @@ button {
 .account-actions .btn:disabled {
   cursor: wait;
   opacity: 0.72;
+}
+
+@media (min-width: 841px) {
+  body[data-page="account"] {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  body[data-page="account"] .site-footer {
+    display: none;
+  }
+
+  body[data-page="account"] #accountRoot {
+    height: calc(100dvh - 130px);
+    min-height: 0;
+  }
+
+  body[data-page="account"] .account-page {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(18px, 3dvh, 34px) 0;
+  }
+
+  body[data-page="account"] .account-title {
+    width: min(100% - 80px, 1560px);
+    gap: clamp(18px, 2vw, 34px);
+  }
+
+  body[data-page="account"] .account-title h1 {
+    font-size: clamp(4.5rem, 9.4dvh, 7rem);
+  }
+
+  body[data-page="account"] .account-title p {
+    max-width: 620px;
+    margin: 0;
+    font-size: clamp(1.05rem, 2.1dvh, 1.35rem);
+    text-align: left;
+  }
+
+  body[data-page="account"] .account-shell {
+    width: min(100% - 80px, 1380px);
+    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+    gap: clamp(16px, 2vw, 26px);
+    margin-top: clamp(20px, 4dvh, 44px);
+  }
+
+  body[data-page="account"] .account-summary {
+    min-height: 0;
+    padding: clamp(20px, 3dvh, 28px);
+  }
+
+  body[data-page="account"] .account-form {
+    gap: clamp(10px, 1.9dvh, 16px);
+    padding: clamp(18px, 3dvh, 30px);
+  }
+
+  body[data-page="account"] .account-form label {
+    gap: 6px;
+  }
+
+  body[data-page="account"] .account-form .roomi-input {
+    height: clamp(48px, 7.1dvh, 64px);
+    font-size: clamp(1.15rem, 2.4dvh, 1.55rem);
+  }
+
+  body[data-page="account"] .account-actions {
+    padding-top: 4px;
+  }
+}
+
+@media (min-width: 841px) and (max-height: 820px) {
+  body[data-page="account"] .account-title h1 {
+    font-size: clamp(3.9rem, 8.6dvh, 5.9rem);
+  }
+
+  body[data-page="account"] .account-title p {
+    font-size: clamp(0.95rem, 2dvh, 1.12rem);
+  }
+
+  body[data-page="account"] .account-shell {
+    margin-top: clamp(14px, 2.8dvh, 28px);
+  }
+
+  body[data-page="account"] .account-avatar-preview {
+    width: 112px;
+    height: 112px;
+    margin-bottom: 8px;
+    border-width: 6px;
+  }
+
+  body[data-page="account"] .account-summary {
+    gap: 7px;
+  }
+
+  body[data-page="account"] .account-summary strong {
+    font-size: 1.25rem;
+  }
+
+  body[data-page="account"] .account-logout {
+    min-height: 38px;
+    margin-top: 8px;
+  }
+
+  body[data-page="account"] .account-form {
+    gap: 9px;
+    padding: clamp(16px, 2.5dvh, 22px);
+  }
+
+  body[data-page="account"] .account-form .roomi-input {
+    height: clamp(42px, 6.2dvh, 52px);
+    font-size: clamp(1rem, 2.2dvh, 1.28rem);
+  }
 }
 
 .detail-grid {
@@ -2485,16 +2627,27 @@ body.checkout-payment-page .payment-actions .btn:disabled {
   font-weight: 100;
 }
 
+.about-carousel {
+  position: relative;
+  margin: 62px 0 0;
+}
+
+.about-carousel-viewport {
+  overflow: hidden;
+  width: 100%;
+}
+
 .about-product-strip {
   width: max-content;
-  margin: 62px 0 0;
-  display: grid;
-  grid-template-columns: repeat(5, 470px);
+  display: flex;
   gap: 16px;
-  transform: translateX(-116px);
+  transform: translate3d(0, 0, 0);
+  transition: transform 850ms var(--fluid);
+  will-change: transform;
 }
 
 .about-sale-card {
+  flex: 0 0 470px;
   position: relative;
   overflow: hidden;
   height: 432px;
@@ -2502,7 +2655,10 @@ body.checkout-payment-page .payment-actions .btn:disabled {
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
   text-align: center;
-  transition: transform 700ms var(--fluid), filter 700ms var(--fluid);
+  transition:
+    transform 700ms var(--fluid),
+    filter 700ms var(--fluid),
+    opacity 700ms var(--fluid);
 }
 
 .about-sale-card img {
@@ -2515,6 +2671,10 @@ body.checkout-payment-page .payment-actions .btn:disabled {
 .about-sale-card:hover {
   transform: translateY(-6px);
   filter: saturate(1.04);
+}
+
+.about-sale-card.is-active {
+  filter: saturate(1.08);
 }
 
 .about-sale-card:hover img {
@@ -2602,6 +2762,49 @@ body.checkout-payment-page .payment-actions .btn:disabled {
   font-family: var(--copy);
   font-size: 15px;
   font-weight: 400;
+}
+
+.about-carousel-control {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 248, 248, 0.72);
+  border-radius: 999px;
+  background: rgba(80, 0, 0, 0.72);
+  color: var(--cream);
+  box-shadow: 0 16px 34px rgba(24, 0, 0, 0.22);
+  transform: translateY(-50%);
+  transition:
+    background 420ms var(--fluid),
+    color 420ms var(--fluid),
+    transform 420ms var(--fluid);
+}
+
+.about-carousel-control:hover {
+  background: var(--cream);
+  color: var(--maroon);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.about-carousel-control[hidden] {
+  display: none;
+}
+
+.about-carousel-control i {
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.about-carousel-control--prev {
+  left: clamp(16px, 3vw, 56px);
+}
+
+.about-carousel-control--next {
+  right: clamp(16px, 3vw, 56px);
 }
 
 .about-dots {
@@ -2900,11 +3103,11 @@ body.checkout-payment-page .payment-actions .btn:disabled {
   }
 
   .about-product-strip {
-    grid-template-columns: repeat(5, 360px);
-    transform: translateX(-80px);
+    gap: 14px;
   }
 
   .about-sale-card {
+    flex-basis: 360px;
     height: 360px;
   }
 
@@ -3155,14 +3358,30 @@ body.checkout-payment-page .payment-actions .btn:disabled {
   }
 
   .about-product-strip {
-    width: min(100% - 28px, 1220px);
-    margin-inline: auto;
-    grid-template-columns: 1fr;
-    transform: none;
+    gap: 14px;
   }
 
   .about-sale-card {
+    flex-basis: min(82vw, 360px);
     height: 360px;
+  }
+
+  .about-carousel {
+    width: min(100% - 28px, 1220px);
+    margin: 46px auto 0;
+  }
+
+  .about-carousel-control {
+    width: 46px;
+    height: 46px;
+  }
+
+  .about-carousel-control--prev {
+    left: 8px;
+  }
+
+  .about-carousel-control--next {
+    right: 8px;
   }
 
   .decor-left {

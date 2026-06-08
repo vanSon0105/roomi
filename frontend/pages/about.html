@@ -57,29 +57,39 @@
           <h2>Sản Phẩm Bán Chạy</h2>
           <p>Khám phá ngay những sản phẩm dẫn đầu xu hướng đang là được yêu thích nhất tại Roomi !</p>
         </div>
-        <div class="about-product-strip reveal">
-          <article class="about-sale-card is-empty is-peek" data-product-slot="1" aria-label="Khung sản phẩm bán chạy đang chờ dữ liệu">
-            <div class="about-sale-media" aria-hidden="true"></div>
-            <div class="about-sale-info" aria-hidden="true"></div>
-          </article>
-          <article class="about-sale-card is-empty" data-product-slot="2" aria-label="Khung sản phẩm bán chạy đang chờ dữ liệu">
-            <div class="about-sale-media" aria-hidden="true"></div>
-            <div class="about-sale-info" aria-hidden="true"></div>
-          </article>
-          <article class="about-sale-card is-empty" data-product-slot="3" aria-label="Khung sản phẩm bán chạy đang chờ dữ liệu">
-            <div class="about-sale-media" aria-hidden="true"></div>
-            <div class="about-sale-info" aria-hidden="true"></div>
-          </article>
-          <article class="about-sale-card is-empty" data-product-slot="4" aria-label="Khung sản phẩm bán chạy đang chờ dữ liệu">
-            <div class="about-sale-media" aria-hidden="true"></div>
-            <div class="about-sale-info" aria-hidden="true"></div>
-          </article>
-          <article class="about-sale-card is-empty is-peek" data-product-slot="5" aria-label="Khung sản phẩm bán chạy đang chờ dữ liệu">
-            <div class="about-sale-media" aria-hidden="true"></div>
-            <div class="about-sale-info" aria-hidden="true"></div>
-          </article>
+        <div class="about-carousel" data-about-carousel>
+          <button class="about-carousel-control about-carousel-control--prev" type="button" aria-label="Sản phẩm trước" data-about-carousel-prev>
+            <i class="ph ph-caret-left" aria-hidden="true"></i>
+          </button>
+          <div class="about-carousel-viewport">
+            <div class="about-product-strip reveal" id="aboutBestSellerStrip">
+              <article class="about-sale-card is-empty is-peek" data-product-slot="1" aria-label="Khung sản phẩm bán chạy đang chờ dữ liệu">
+                <div class="about-sale-media" aria-hidden="true"></div>
+                <div class="about-sale-info" aria-hidden="true"></div>
+              </article>
+              <article class="about-sale-card is-empty" data-product-slot="2" aria-label="Khung sản phẩm bán chạy đang chờ dữ liệu">
+                <div class="about-sale-media" aria-hidden="true"></div>
+                <div class="about-sale-info" aria-hidden="true"></div>
+              </article>
+              <article class="about-sale-card is-empty" data-product-slot="3" aria-label="Khung sản phẩm bán chạy đang chờ dữ liệu">
+                <div class="about-sale-media" aria-hidden="true"></div>
+                <div class="about-sale-info" aria-hidden="true"></div>
+              </article>
+              <article class="about-sale-card is-empty" data-product-slot="4" aria-label="Khung sản phẩm bán chạy đang chờ dữ liệu">
+                <div class="about-sale-media" aria-hidden="true"></div>
+                <div class="about-sale-info" aria-hidden="true"></div>
+              </article>
+              <article class="about-sale-card is-empty is-peek" data-product-slot="5" aria-label="Khung sản phẩm bán chạy đang chờ dữ liệu">
+                <div class="about-sale-media" aria-hidden="true"></div>
+                <div class="about-sale-info" aria-hidden="true"></div>
+              </article>
+            </div>
+          </div>
+          <button class="about-carousel-control about-carousel-control--next" type="button" aria-label="Sản phẩm tiếp theo" data-about-carousel-next>
+            <i class="ph ph-caret-right" aria-hidden="true"></i>
+          </button>
         </div>
-        <div class="about-dots" aria-hidden="true">
+        <div class="about-dots" id="aboutBestSellerDots" aria-hidden="true">
           <span></span>
           <span></span>
           <span class="is-active"></span>
@@ -92,6 +102,6 @@
     <div data-footer></div>
     <div data-chat></div>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script type="module" src="../assets/js/about.js?v=pages-path-1"></script>
+    <script type="module" src="../assets/js/about.js?v=about-carousel-2"></script>
   </body>
 </html>

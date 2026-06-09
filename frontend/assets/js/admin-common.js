@@ -7,6 +7,7 @@ const adminNav = [
   { id: 'orders', label: 'Đơn hàng', href: 'orders.html', icon: 'ph-receipt' },
   { id: 'products', label: 'Sản phẩm', href: 'products.html', icon: 'ph-package' },
   { id: 'users', label: 'Người dùng', href: 'users.html', icon: 'ph-users-three' },
+  { id: 'payment-settings', label: 'Thanh toán', href: 'payment-settings.html', icon: 'ph-credit-card' },
 ];
 
 const orderStatusLabels = {
@@ -30,9 +31,11 @@ const paymentDisplayLabels = {
 };
 
 const paymentMethodLabels = {
-  BANK_TRANSFER: 'Chuyển khoản VietQR',
+  BANK_TRANSFER: 'Chuyển khoản',
   COD: 'Thanh toán khi nhận hàng',
   ONLINE: 'Thanh toán online',
+  PAYOS: 'Chuyển khoản',
+  SEPAY: 'Chuyển khoản',
 };
 
 const productStatusLabels = {

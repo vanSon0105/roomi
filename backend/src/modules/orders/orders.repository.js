@@ -4,6 +4,10 @@ const orderInclude = {
   items: {
     orderBy: { id: 'asc' },
   },
+  paymentTransactions: {
+    orderBy: { createdAt: 'desc' },
+    take: 1,
+  },
 };
 
 const cartForCheckoutInclude = {
@@ -28,6 +32,18 @@ const findCartForCheckout = (userId, client) =>
 const create = (data, client) =>
   withClient(client).order.create({
     data,
+    include: orderInclude,
+  });
+
+const findById = (id, client) =>
+  withClient(client).order.findUnique({
+    where: { id },
+    include: orderInclude,
+  });
+
+const findByCode = (code, client) =>
+  withClient(client).order.findUnique({
+    where: { code },
     include: orderInclude,
   });
 
@@ -78,6 +94,8 @@ module.exports = {
   clearCart,
   create,
   deleteCartItem,
+  findById,
+  findByCode,
   findByCodeForUser,
   findCartForCheckout,
   transaction,

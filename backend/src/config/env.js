@@ -18,11 +18,29 @@ const config = {
   corsOrigin: process.env.CORS_ORIGIN || '*',
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS || 10),
   checkoutShippingFee: Number(process.env.CHECKOUT_SHIPPING_FEE || 30000),
+  appBaseUrl: (process.env.APP_BASE_URL || `http://localhost:${process.env.PORT || 4000}`).replace(/\/+$/, ''),
   vietqr: {
     bankId: process.env.VIETQR_BANK_ID || '',
     accountNo: process.env.VIETQR_ACCOUNT_NO || '',
     accountName: process.env.VIETQR_ACCOUNT_NAME || '',
     template: process.env.VIETQR_TEMPLATE || 'compact2',
+  },
+  payos: {
+    clientId: process.env.PAYOS_CLIENT_ID || '',
+    apiKey: process.env.PAYOS_API_KEY || '',
+    checksumKey: process.env.PAYOS_CHECKSUM_KEY || '',
+    partnerCode: process.env.PAYOS_PARTNER_CODE || '',
+    webhookUrl: process.env.PAYOS_WEBHOOK_URL || '',
+    returnUrl: process.env.PAYOS_RETURN_URL || '',
+    cancelUrl: process.env.PAYOS_CANCEL_URL || '',
+  },
+  sepay: {
+    webhookApiKey: process.env.SEPAY_WEBHOOK_API_KEY || '',
+    webhookUrl: process.env.SEPAY_WEBHOOK_URL || '',
+    accountNo: process.env.SEPAY_ACCOUNT_NO || '',
+    accountName: process.env.SEPAY_ACCOUNT_NAME || '',
+    qrBankName: process.env.SEPAY_QR_BANK_NAME || 'VietinBank',
+    qrBaseUrl: (process.env.SEPAY_QR_BASE_URL || 'https://qr.sepay.vn/img').replace(/\/+$/, ''),
   },
 };
 
@@ -42,4 +60,26 @@ if (!Number.isInteger(config.authCookieMaxAgeSeconds) || config.authCookieMaxAge
   throw new Error('AUTH_COOKIE_MAX_AGE_SECONDS must be a positive integer');
 }
 
+// Merge DB settings into config (DB overrides .env when set)
+const syncFromDb = async () => {
+  try {
+    const prisma = require('./prisma');
+    const settings = await prisma.setting.findMany();
+    const map = {};
+    for (const s of settings) {
+      if (s.value) map[s.key] = s.value;
+    }
+
+    if (map.payos_client_id) config.payos.clientId = map.payos_client_id;
+    if (map.payos_api_key) config.payos.apiKey = map.payos_api_key;
+    if (map.payos_checksum_key) config.payos.checksumKey = map.payos_checksum_key;
+    if (map.sepay_account_no) config.sepay.accountNo = map.sepay_account_no;
+    if (map.sepay_account_name) config.sepay.accountName = map.sepay_account_name;
+    if (map.sepay_qr_bank_name) config.sepay.qrBankName = map.sepay_qr_bank_name;
+  } catch (_error) {
+    // DB not ready yet (first migration) — ignore
+  }
+};
+
 module.exports = config;
+module.exports.syncFromDb = syncFromDb;

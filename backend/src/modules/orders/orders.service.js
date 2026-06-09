@@ -4,6 +4,8 @@ const config = require('../../config/env');
 const AppError = require('../../utils/app-error');
 const ordersRepository = require('./orders.repository');
 const { serializeOrder } = require('./orders.presenter');
+const paymentsService = require('../payments/payments.service');
+const settingsService = require('../settings/settings.service');
 
 const toNumber = (value) => Number(value || 0);
 const toMoney = (value) => Number(value).toFixed(2);
@@ -25,6 +27,16 @@ const buildOrderNote = ({ paymentCode, email, note }) =>
     .join('\n');
 
 const createOrder = async (userId, payload) => {
+  // Resolve BANK_TRANSFER to active transfer provider
+  if (payload.paymentMethod === 'BANK_TRANSFER') {
+    const provider = await settingsService.getTransferProvider();
+    payload.paymentMethod = provider; // SEPAy, PAYOS, or BANK_TRANSFER
+  }
+
+  if (payload.paymentMethod === 'PAYOS' && !paymentsService.isPayosConfigured()) {
+    throw new AppError('payOS is not configured', 400);
+  }
+
   const order = await ordersRepository.transaction(async (tx) => {
     const cart = await ordersRepository.findCartForCheckout(userId, tx);
 
@@ -111,6 +123,11 @@ const createOrder = async (userId, payload) => {
     return savedOrder;
   });
 
+  if (order.paymentMethod === 'PAYOS') {
+    const payableOrder = await paymentsService.createPayosPaymentForOrder(order);
+    return serializeOrder(payableOrder);
+  }
+
   return serializeOrder(order);
 };
 
@@ -122,6 +139,29 @@ const getOrder = async (userId, code) => {
   }
 
   return serializeOrder(order);
+};
+
+const getOrderPublic = async (code) => {
+  const order = await ordersRepository.findByCode(code);
+
+  if (!order) {
+    throw new AppError('Order not found', 404);
+  }
+
+  return serializeOrder(order);
+};
+
+const getOrderByProviderCode = async (providerOrderCode) => {
+  const paymentsRepository = require('../payments/payments.repository');
+  const transaction = await paymentsRepository.findTransactionByProviderOrderCode(
+    BigInt(providerOrderCode),
+  );
+
+  if (!transaction || !transaction.order) {
+    throw new AppError('Order not found', 404);
+  }
+
+  return serializeOrder(transaction.order);
 };
 
 const removeOrderItemsFromCart = async ({ userId, orderItems, tx }) => {
@@ -208,6 +248,10 @@ const useCashOnDelivery = async (userId, code) => {
       return existingOrder;
     }
 
+    if (existingOrder.paymentMethod === 'PAYOS') {
+      throw new AppError('Cannot switch a payOS order to cash on delivery', 409);
+    }
+
     await removeOrderItemsFromCart({
       userId,
       orderItems: existingOrder.items,
@@ -229,6 +273,8 @@ const useCashOnDelivery = async (userId, code) => {
 module.exports = {
   createOrder,
   getOrder,
+  getOrderByProviderCode,
+  getOrderPublic,
   reportPaid,
   useCashOnDelivery,
 };

@@ -21,11 +21,6 @@ const protectedPages = {
     message: 'Hãy đăng nhập để thanh toán',
     roles: ['USER', 'ADMIN'],
   },
-  'checkout-success.html': {
-    page: 'cart',
-    message: 'Hãy đăng nhập để xem đơn hàng',
-    roles: ['USER', 'ADMIN'],
-  },
   'room-3d.html': {
     page: 'room-3d',
     message: 'Hãy đăng nhập để trải nghiệm mô phỏng 3D',

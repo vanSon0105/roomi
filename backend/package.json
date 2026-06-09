@@ -19,6 +19,7 @@
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
+    "@payos/node": "^2.0.5",
     "@prisma/adapter-mariadb": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "bcrypt": "^6.0.0",

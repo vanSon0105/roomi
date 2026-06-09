@@ -10,6 +10,10 @@ const {
 
 const router = express.Router();
 
+// Public — cho trang checkout-success sau khi PayOS/SePay redirect về
+router.get('/public/:code', validate(orderCodeParamSchema), ordersController.getOrderPublic);
+router.get('/public/provider/:code', validate(orderCodeParamSchema), ordersController.getOrderByProviderCode);
+
 router.use(authMiddleware);
 
 router.post('/', validate(createOrderSchema), ordersController.createOrder);

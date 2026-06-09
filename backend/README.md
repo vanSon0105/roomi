@@ -57,6 +57,7 @@ cart_items
 addresses
 orders
 order_items
+payment_transactions
 ```
 
 Product data and images:
@@ -95,6 +96,21 @@ VIETQR_TEMPLATE="compact2"
 ```
 
 The order code is used as the unique bank-transfer content. Keep `VIETQR_ACCOUNT_NAME` without Vietnamese accents for best banking-app compatibility.
+
+payOS automatic confirmation:
+
+```txt
+APP_BASE_URL="https://your-domain.com"
+PAYOS_CLIENT_ID=""
+PAYOS_API_KEY=""
+PAYOS_CHECKSUM_KEY=""
+PAYOS_PARTNER_CODE=""
+PAYOS_WEBHOOK_URL=""
+PAYOS_RETURN_URL=""
+PAYOS_CANCEL_URL=""
+SEPAY_WEBHOOK_API_KEY=""
+SEPAY_WEBHOOK_URL=""
+```
 
 ## API
 
@@ -161,9 +177,13 @@ POST /orders
 GET /orders/:code
 POST /orders/:code/report-paid
 POST /orders/:code/cash-on-delivery
+POST /payments/payos/webhook
+GET /payments/payos/config
+POST /payments/sepay/webhook
+GET /payments/sepay/config
 ```
 
-`POST /orders` accepts `paymentMethod=BANK_TRANSFER|COD`. Bank-transfer orders create a pending VietQR order and keep the cart unchanged. `POST /orders/:code/report-paid` records that the customer clicked "Tôi đã chuyển khoản" and removes only the ordered product quantities from the cart. COD orders, or `POST /orders/:code/cash-on-delivery`, remove the ordered product quantities from the cart immediately. The order still remains `paymentStatus=UNPAID` until admin confirms the money.
+`POST /orders` accepts `paymentMethod=SEPAY|PAYOS|BANK_TRANSFER|COD`. SePay orders show a VietQR bank-transfer QR and wait for `POST /payments/sepay/webhook` to receive an incoming balance-change event. The webhook matches the order code in transfer content and automatically marks the order `paymentStatus=PAID` when the received amount is enough. payOS orders create a payment link and redirect the customer to payOS. Bank-transfer orders create a pending VietQR order and keep the cart unchanged. `POST /orders/:code/report-paid` records that the customer clicked "Tôi đã chuyển khoản" and removes only the ordered product quantities from the cart. COD orders, or `POST /orders/:code/cash-on-delivery`, remove the ordered product quantities from the cart immediately.
 
 Users:
 

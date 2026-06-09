@@ -5,6 +5,12 @@ const toNumber = (value) => (value == null ? 0 : Number(value));
 const hasVietQrConfig = () =>
   Boolean(config.vietqr.bankId && config.vietqr.accountNo && config.vietqr.accountName);
 
+const hasPayosConfig = () =>
+  Boolean(config.payos.clientId && config.payos.apiKey && config.payos.checksumKey);
+
+const hasSepayQrConfig = () =>
+  Boolean(config.sepay.accountNo && config.sepay.qrBankName);
+
 const buildVietQrUrl = ({ amount, transferContent }) => {
   if (!hasVietQrConfig()) {
     return null;
@@ -22,6 +28,24 @@ const buildVietQrUrl = ({ amount, transferContent }) => {
   return `https://img.vietqr.io/image/${pathBankId}-${pathAccountNo}-${pathTemplate}.png?${params.toString()}`;
 };
 
+const buildSeVqrUrl = ({ amount, transferContent }) => {
+  if (!hasSepayQrConfig()) {
+    console.log('[SEVQR] Config missing — accountNo:', Boolean(config.sepay.accountNo), 'qrBankName:', Boolean(config.sepay.qrBankName));
+    return null;
+  }
+
+  const params = new URLSearchParams({
+    acc: config.sepay.accountNo,
+    bank: config.sepay.qrBankName,
+    amount: String(Math.round(amount)),
+    des: transferContent,
+  });
+
+  const url = `${config.sepay.qrBaseUrl}?${params.toString()}`;
+  console.log('[SEVQR] Generated QR URL:', url);
+  return url;
+};
+
 const serializeOrderItem = (item) => ({
   id: item.id,
   productId: item.productId,
@@ -33,9 +57,13 @@ const serializeOrderItem = (item) => ({
 });
 
 const serializeOrder = (order) => {
+  const subtotal = toNumber(order.subtotal);
   const total = toNumber(order.total);
   const isBankTransfer = order.paymentMethod === 'BANK_TRANSFER';
-  const transferContent = isBankTransfer ? order.code : null;
+  const isSepay = order.paymentMethod === 'SEPAY';
+  const isPayos = order.paymentMethod === 'PAYOS';
+  const transferContent = isSepay ? `SEVQR ${order.code}` : isBankTransfer ? order.code : null;
+  const latestPaymentTransaction = order.paymentTransactions?.[0] || null;
 
   return {
     id: order.id,
@@ -46,7 +74,7 @@ const serializeOrder = (order) => {
     status: order.status,
     paymentStatus: order.paymentStatus,
     paymentMethod: order.paymentMethod,
-    subtotal: toNumber(order.subtotal),
+    subtotal,
     shippingFee: toNumber(order.shippingFee),
     discountAmount: toNumber(order.discountAmount),
     total,
@@ -54,17 +82,21 @@ const serializeOrder = (order) => {
     paymentReportedAt: order.paymentReportedAt,
     items: (order.items || []).map(serializeOrderItem),
     payment: {
-      provider: isBankTransfer ? 'VIETQR' : 'COD',
-      configured: isBankTransfer && hasVietQrConfig(),
+      provider: isPayos ? 'PAYOS' : isSepay ? 'SEPAY' : isBankTransfer ? 'VIETQR' : 'COD',
+      configured: isPayos ? hasPayosConfig() : isSepay ? hasSepayQrConfig() : isBankTransfer && hasVietQrConfig(),
       reported: Boolean(order.paymentReportedAt),
       reportedAt: order.paymentReportedAt,
       amount: total,
       transferContent,
-      qrUrl: isBankTransfer ? buildVietQrUrl({ amount: total, transferContent }) : null,
-      bankId: isBankTransfer ? config.vietqr.bankId || null : null,
-      accountNo: isBankTransfer ? config.vietqr.accountNo || null : null,
-      accountName: isBankTransfer ? config.vietqr.accountName || null : null,
-      template: isBankTransfer ? config.vietqr.template : null,
+      qrUrl: isPayos ? null : isSepay ? buildSeVqrUrl({ amount: total, transferContent }) : isBankTransfer ? buildVietQrUrl({ amount: total, transferContent }) : null,
+      checkoutUrl: isPayos ? latestPaymentTransaction?.checkoutUrl || null : null,
+      qrCode: isPayos ? latestPaymentTransaction?.qrCode || null : null,
+      transactionStatus: isPayos || isSepay ? latestPaymentTransaction?.status || null : null,
+      paymentLinkId: isPayos ? latestPaymentTransaction?.providerPaymentLinkId || null : null,
+      bankId: isBankTransfer ? config.vietqr.bankId || null : isSepay ? config.sepay.qrBankName || null : null,
+      accountNo: isSepay ? config.sepay.accountNo || null : isBankTransfer ? config.vietqr.accountNo || null : null,
+      accountName: isSepay ? config.sepay.accountName || null : isBankTransfer ? config.vietqr.accountName || null : null,
+      template: isBankTransfer ? config.vietqr.template : isSepay ? 'SEVQR' : null,
     },
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,

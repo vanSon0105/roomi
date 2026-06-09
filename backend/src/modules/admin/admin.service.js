@@ -39,6 +39,10 @@ const orderInclude = {
   items: {
     orderBy: { id: 'asc' },
   },
+  paymentTransactions: {
+    orderBy: { createdAt: 'desc' },
+    take: 1,
+  },
 };
 
 const userSelect = {

@@ -9,7 +9,7 @@ import {
   renderAdminError,
   renderAdminShell,
   statusBadge,
-} from './admin-common.js?v=admin-cod-1';
+} from './admin-common.js?v=admin-sepay-1';
 
 renderAdminShell('dashboard');
 
@@ -32,15 +32,15 @@ function renderDashboard(data) {
     <div class="admin-page-head">
       <div>
         <h1>Tổng quan</h1>
-        <p>Theo dõi đơn, thanh toán VietQR, tồn kho và người dùng từ một màn hình.</p>
+        <p>Theo dõi đơn, thanh toán, tồn kho và người dùng từ một màn hình.</p>
       </div>
       <a class="admin-primary-link" href="orders.html">Xem đơn hàng</a>
     </div>
 
     <section class="admin-stat-grid">
       ${statCard('Đơn hôm nay', String(cards.todayOrders || 0), `${cards.totalOrders || 0} đơn toàn hệ thống`)}
-      ${statCard('Chờ thanh toán', String(cards.pendingPayment || 0), 'Đã tạo QR, chưa đối soát')}
-      ${statCard('Khách báo chuyển khoản', String(cards.paymentReported || 0), 'Cần kiểm tra sao kê')}
+      ${statCard('Chờ thanh toán', String(cards.pendingPayment || 0), 'Chờ SePay, payOS hoặc COD xác nhận')}
+      ${statCard('Khách báo chuyển khoản', String(cards.paymentReported || 0), 'Cần kiểm tra đối soát')}
       ${statCard('Doanh thu hôm nay', formatCurrency(cards.todayRevenue || 0), `Đã xác nhận: ${formatCurrency(cards.revenue || 0)}`)}
     </section>
 

@@ -12,7 +12,7 @@ import {
   renderAdminShell,
   renderPagination,
   statusBadge,
-} from './admin-common.js?v=admin-cod-1';
+} from './admin-common.js?v=admin-sepay-1';
 
 renderAdminShell('orders');
 
@@ -120,7 +120,7 @@ function renderOrders(data) {
     <div class="admin-page-head">
       <div>
         <h1>Đơn hàng</h1>
-        <p>Tìm kiếm, đối soát VietQR và cập nhật luồng xử lý đơn.</p>
+        <p>Tìm kiếm, đối soát và cập nhật luồng xử lý đơn.</p>
       </div>
       <span class="admin-count">${data.pagination.total} đơn</span>
     </div>

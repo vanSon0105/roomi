@@ -1,0 +1,5 @@
+ALTER TABLE `orders`
+MODIFY `paymentMethod` ENUM('COD', 'BANK_TRANSFER', 'ONLINE', 'PAYOS', 'SEPAY') NOT NULL DEFAULT 'COD';
+
+ALTER TABLE `payment_transactions`
+MODIFY `provider` ENUM('PAYOS', 'SEPAY') NOT NULL DEFAULT 'PAYOS';

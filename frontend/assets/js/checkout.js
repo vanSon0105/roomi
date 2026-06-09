@@ -7,6 +7,14 @@ const root = document.querySelector('#checkoutRoot');
 const mode = document.body.dataset.checkout || 'form';
 const previewShipping = 30000;
 const SELECTED_CART_STORAGE_KEY = 'roomi_selected_cart_items';
+let paymentPollTimer = null;
+
+function clearPaymentPoll() {
+  if (paymentPollTimer) {
+    window.clearTimeout(paymentPollTimer);
+    paymentPollTimer = null;
+  }
+}
 
 function readSelectedCartItemIds() {
   const raw = sessionStorage.getItem(SELECTED_CART_STORAGE_KEY);
@@ -46,12 +54,14 @@ function setFormLayout(isActive) {
 
 function renderLoading(message = 'Đang tải giỏ hàng...') {
   if (!root) return;
+  clearPaymentPoll();
   setPaymentLayout(false);
   root.innerHTML = `<section class="container checkout-title-row"><p class="empty-copy">${escapeHtml(message)}</p></section>`;
 }
 
 function renderEmpty() {
   if (!root) return;
+  clearPaymentPoll();
   setFormLayout(false);
   root.innerHTML = `
     <section class="locked-state container reveal">
@@ -67,6 +77,7 @@ function renderEmpty() {
 
 function renderError(error) {
   if (!root) return;
+  clearPaymentPoll();
   setFormLayout(false);
   root.innerHTML = `
     <section class="locked-state container">
@@ -103,8 +114,16 @@ function isCashOnDelivery(order) {
   return order.paymentMethod === 'COD' || order.payment?.provider === 'COD';
 }
 
+function isPayos(order) {
+  return order.paymentMethod === 'PAYOS' || order.payment?.provider === 'PAYOS';
+}
+
+function isSepay(order) {
+  return order.paymentMethod === 'SEPAY' || order.payment?.provider === 'SEPAY';
+}
+
 function renderReportPaidAction(order) {
-  if (isCashOnDelivery(order)) {
+  if (isCashOnDelivery(order) || isPayos(order) || isSepay(order)) {
     return '';
   }
 
@@ -116,7 +135,7 @@ function renderReportPaidAction(order) {
 }
 
 function renderCashOnDeliveryAction(order) {
-  if (isCashOnDelivery(order) || order.paymentReportedAt || order.payment?.reported || order.paymentStatus === 'PAID') {
+  if (isCashOnDelivery(order) || isPayos(order) || isSepay(order) || order.paymentReportedAt || order.payment?.reported || order.paymentStatus === 'PAID') {
     return '';
   }
 
@@ -181,6 +200,7 @@ function bindCashOnDeliveryButton() {
 
 function renderPaymentRows(order) {
   const payment = order.payment || {};
+
   const rows = [
     ['Mã đơn hàng', order.code],
     ['Số tiền', formatCurrency(payment.amount || order.total)],
@@ -204,6 +224,84 @@ function renderPaymentRows(order) {
     .join('');
 }
 
+function renderPaidSuccess(order) {
+  if (!root) return;
+  clearPaymentPoll();
+  sessionStorage.removeItem(SELECTED_CART_STORAGE_KEY);
+  setFormLayout(false);
+
+  root.innerHTML = `
+    <section class="locked-state container reveal">
+      <div>
+        <p class="section-kicker">THANH TOÁN THÀNH CÔNG</p>
+        <h1>Đơn hàng đã thanh toán</h1>
+        <p>Đơn ${escapeHtml(order.code)} đã được xác nhận. ROOMI sẽ xử lý đơn hàng và liên hệ giao hàng.</p>
+        <div class="payment-actions payment-actions--center">
+          <a class="btn btn-maroon" href="${pageHref('products.html')}">Tiếp tục mua sắm</a>
+          <a class="btn btn-outline" href="${homeHref}">Về trang chủ</a>
+        </div>
+      </div>
+    </section>
+  `;
+
+  observeReveal();
+}
+
+function pollPaymentOrder(code, attempt = 0) {
+  clearPaymentPoll();
+
+  if (!code || attempt >= 40) {
+    const note = root?.querySelector('[data-payment-poll-note]');
+    if (note) {
+      note.textContent = 'Hệ thống chưa nhận được webhook xác nhận. Bạn có thể tải lại trang sau ít phút.';
+    }
+    return;
+  }
+
+  paymentPollTimer = window.setTimeout(async () => {
+    try {
+      const response = await apiFetch(`/orders/${encodeURIComponent(code)}`);
+      const order = response.data;
+
+      if (order.paymentStatus === 'PAID') {
+        renderPaidSuccess(order);
+        return;
+      }
+
+      pollPaymentOrder(code, attempt + 1);
+    } catch (_error) {
+      pollPaymentOrder(code, attempt + 1);
+    }
+  }, 2500);
+}
+
+function renderAutoPaymentPending(order) {
+  if (!root) return;
+  setFormLayout(false);
+
+  if (order.paymentStatus === 'PAID') {
+    renderPaidSuccess(order);
+    return;
+  }
+
+  root.innerHTML = `
+    <section class="locked-state container reveal">
+      <div>
+        <p class="section-kicker">CHUYỂN KHOẢN</p>
+        <h1>Đang chờ xác nhận</h1>
+        <p>Đơn ${escapeHtml(order.code)} đang chờ xác nhận thanh toán. Trang sẽ tự cập nhật khi hoàn tất.</p>
+        <p class="checkout-notice" data-payment-poll-note>Trang sẽ tự cập nhật khi thanh toán được xác nhận.</p>
+        <div class="payment-actions payment-actions--center">
+          <a class="btn btn-outline" href="${pageHref('products.html')}">Tiếp tục mua sắm</a>
+        </div>
+      </div>
+    </section>
+  `;
+
+  observeReveal();
+  pollPaymentOrder(order.code);
+}
+
 function renderOrderPayment(order, { successView = false } = {}) {
   if (!root) return;
 
@@ -212,6 +310,17 @@ function renderOrderPayment(order, { successView = false } = {}) {
     return;
   }
 
+  if (isPayos(order)) {
+    renderAutoPaymentPending(order);
+    return;
+  }
+
+  if (isSepay(order) && order.paymentStatus === 'PAID') {
+    renderPaidSuccess(order);
+    return;
+  }
+
+  clearPaymentPoll();
   setPaymentLayout(true);
 
   const payment = order.payment || {};
@@ -220,7 +329,7 @@ function renderOrderPayment(order, { successView = false } = {}) {
     : `
       <div class="vietqr-missing">
         <strong>Chưa cấu hình tài khoản nhận tiền</strong>
-        <p>Điền VIETQR_BANK_ID, VIETQR_ACCOUNT_NO và VIETQR_ACCOUNT_NAME trong backend/.env rồi restart server.</p>
+        <p>Điền VIETQR_ACCOUNT_NO, VIETQR_ACCOUNT_NAME và SEPAY_QR_BANK_NAME (nếu dùng SePay) hoặc VIETQR_BANK_ID (nếu dùng VietQR) trong backend/.env rồi restart server.</p>
       </div>
     `;
 
@@ -232,17 +341,18 @@ function renderOrderPayment(order, { successView = false } = {}) {
 
     <section class="vietqr-section container reveal">
       <div class="vietqr-card">
-        <p class="section-kicker">VIETQR</p>
+        <p class="section-kicker">CHUYỂN KHOẢN</p>
         ${qrMarkup}
         <p class="vietqr-help">QR đã có sẵn số tiền và nội dung chuyển khoản riêng cho đơn này.</p>
       </div>
 
       <div class="payment-info-card">
         <h2>${successView ? 'Đang chờ đối soát' : 'Thông tin chuyển khoản'}</h2>
-        <p>Sau khi chuyển khoản, ROOMI sẽ kiểm tra sao kê theo đúng mã nội dung bên dưới.</p>
+        <p>Sau khi chuyển khoản, ROOMI sẽ kiểm tra và xác nhận thanh toán.</p>
         <div class="payment-info-list">
           ${renderPaymentRows(order)}
         </div>
+        <p class="checkout-notice" data-payment-poll-note>Trang sẽ tự cập nhật khi thanh toán được xác nhận.</p>
         <div class="payment-actions">
           ${renderReportPaidAction(order)}
           ${renderCashOnDeliveryAction(order)}
@@ -256,10 +366,12 @@ function renderOrderPayment(order, { successView = false } = {}) {
   bindReportPaidButton();
   bindCashOnDeliveryButton();
   observeReveal();
+  pollPaymentOrder(order.code);
 }
 
 function renderCashOnDeliverySuccess(order) {
   if (!root) return;
+  clearPaymentPoll();
   setFormLayout(false);
 
   root.innerHTML = `
@@ -314,7 +426,7 @@ function bindCheckoutForm() {
     });
 
     if (submitButton) {
-      submitButton.textContent = paymentMethod === 'COD' ? 'Đang đặt hàng...' : 'Đang tạo QR...';
+      submitButton.textContent = paymentMethod === 'COD' ? 'Đang đặt hàng...' : 'Đang tạo đơn...';
     }
 
     try {
@@ -323,11 +435,21 @@ function bindCheckoutForm() {
         body: JSON.stringify(getFormPayload(form, paymentMethod)),
       });
 
-      if (paymentMethod === 'COD') {
+      const order = response.data;
+
+      // PayOS — redirect thẳng, không cần bước trung gian
+      if (order.payment?.provider === 'PAYOS') {
+        const checkoutUrl = order.payment.checkoutUrl;
+        if (checkoutUrl) {
+          window.location.href = checkoutUrl;
+          return;
+        }
+        renderAutoPaymentPending(order);
+      } else if (order.paymentMethod === 'COD' || order.payment?.provider === 'COD') {
         sessionStorage.removeItem(SELECTED_CART_STORAGE_KEY);
-        renderCashOnDeliverySuccess(response.data);
+        renderCashOnDeliverySuccess(order);
       } else {
-        renderOrderPayment(response.data);
+        renderOrderPayment(order);
       }
     } catch (error) {
       if (notice) {
@@ -389,7 +511,7 @@ function renderCheckout(cart) {
           <div class="payment-row">
             <span>Thanh toán</span>
             <div class="payment-method-actions">
-              <button class="btn btn-maroon payment-submit" type="submit" data-payment-method="BANK_TRANSFER">Chuyển khoản VietQR</button>
+              <button class="btn btn-maroon payment-submit" type="submit" data-payment-method="BANK_TRANSFER">Chuyển khoản</button>
               <button class="btn btn-outline payment-submit" type="submit" data-payment-method="COD">Thanh toán khi nhận hàng</button>
             </div>
             <p class="checkout-notice" data-checkout-notice></p>
@@ -429,7 +551,7 @@ function renderCheckout(cart) {
       </div>
       <div>
         <strong>Ghi chú</strong>
-        <p>Chọn VietQR để quét mã chuyển khoản, hoặc chọn thanh toán khi nhận hàng nếu bạn muốn trả tiền lúc giao hàng.</p>
+        <p>Chuyển khoản qua QR để được xác nhận tự động, hoặc chọn thanh toán khi nhận hàng.</p>
       </div>
     </section>
     <section class="checkout-total">
@@ -444,9 +566,11 @@ function renderCheckout(cart) {
 }
 
 async function renderSuccess() {
-  const code = new URLSearchParams(window.location.search).get('code');
+  const query = new URLSearchParams(window.location.search);
+  const ref = query.get('ref');             // Our order code (RM...)
+  const payosOrderCode = query.get('orderCode'); // PayOS's internal code
 
-  if (!code) {
+  if (!ref && !payosOrderCode) {
     if (!root) return;
     root.innerHTML = `
       <section class="locked-state container reveal">
@@ -467,8 +591,13 @@ async function renderSuccess() {
 
   renderLoading('Đang tải thông tin đơn hàng...');
 
+  // ref = our RM order code; orderCode = PayOS's internal code
+  const endpoint = ref
+    ? `/orders/public/${encodeURIComponent(ref)}`
+    : `/orders/public/provider/${encodeURIComponent(payosOrderCode)}`;
+
   try {
-    const response = await apiFetch(`/orders/${encodeURIComponent(code)}`);
+    const response = await apiFetch(endpoint);
     renderOrderPayment(response.data, { successView: true });
   } catch (error) {
     renderError(error);

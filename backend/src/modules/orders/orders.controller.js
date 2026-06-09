@@ -21,6 +21,24 @@ const getOrder = asyncHandler(async (req, res) => {
   });
 });
 
+const getOrderPublic = asyncHandler(async (req, res) => {
+  const data = await ordersService.getOrderPublic(req.validated.params.code);
+
+  sendSuccess(res, {
+    message: 'Order fetched successfully',
+    data,
+  });
+});
+
+const getOrderByProviderCode = asyncHandler(async (req, res) => {
+  const data = await ordersService.getOrderByProviderCode(req.validated.params.code);
+
+  sendSuccess(res, {
+    message: 'Order fetched successfully',
+    data,
+  });
+});
+
 const reportPaid = asyncHandler(async (req, res) => {
   const data = await ordersService.reportPaid(req.user.id, req.validated.params.code);
 
@@ -42,6 +60,8 @@ const useCashOnDelivery = asyncHandler(async (req, res) => {
 module.exports = {
   createOrder,
   getOrder,
+  getOrderByProviderCode,
+  getOrderPublic,
   reportPaid,
   useCashOnDelivery,
 };

@@ -7,6 +7,7 @@ const createOrderSchema = z.object({
     email: z.string().trim().email().max(160).optional().or(z.literal('')),
     address: z.string().trim().min(5).max(300),
     note: z.string().trim().max(1000).optional().or(z.literal('')),
+    paymentMethod: z.enum(['BANK_TRANSFER', 'COD']).default('BANK_TRANSFER'),
     cartItemIds: z.array(z.coerce.number().int().positive()).min(1).max(100).optional(),
   }),
 });

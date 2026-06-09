@@ -34,7 +34,8 @@ const serializeOrderItem = (item) => ({
 
 const serializeOrder = (order) => {
   const total = toNumber(order.total);
-  const transferContent = order.code;
+  const isBankTransfer = order.paymentMethod === 'BANK_TRANSFER';
+  const transferContent = isBankTransfer ? order.code : null;
 
   return {
     id: order.id,
@@ -53,17 +54,17 @@ const serializeOrder = (order) => {
     paymentReportedAt: order.paymentReportedAt,
     items: (order.items || []).map(serializeOrderItem),
     payment: {
-      provider: 'VIETQR',
-      configured: hasVietQrConfig(),
+      provider: isBankTransfer ? 'VIETQR' : 'COD',
+      configured: isBankTransfer && hasVietQrConfig(),
       reported: Boolean(order.paymentReportedAt),
       reportedAt: order.paymentReportedAt,
       amount: total,
       transferContent,
-      qrUrl: buildVietQrUrl({ amount: total, transferContent }),
-      bankId: config.vietqr.bankId || null,
-      accountNo: config.vietqr.accountNo || null,
-      accountName: config.vietqr.accountName || null,
-      template: config.vietqr.template,
+      qrUrl: isBankTransfer ? buildVietQrUrl({ amount: total, transferContent }) : null,
+      bankId: isBankTransfer ? config.vietqr.bankId || null : null,
+      accountNo: isBankTransfer ? config.vietqr.accountNo || null : null,
+      accountName: isBankTransfer ? config.vietqr.accountName || null : null,
+      template: isBankTransfer ? config.vietqr.template : null,
     },
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,

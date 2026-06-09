@@ -2005,6 +2005,12 @@ button {
   transform: none;
 }
 
+.payment-method-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
 .checkout-notice {
   width: 100%;
   margin: -4px 0 0;
@@ -2047,7 +2053,7 @@ body.checkout-form-page .payment-row button {
 }
 
 body.checkout-form-page .payment-submit {
-  min-width: min(100%, 360px);
+  min-width: min(100%, 310px);
 }
 
 .checkout-review {
@@ -2291,6 +2297,10 @@ body.checkout-payment-page .payment-info-row button {
 
 body.checkout-payment-page .payment-actions {
   margin-top: clamp(12px, 2.2dvh, 24px);
+}
+
+body.checkout-payment-page .payment-actions--center {
+  justify-content: center;
 }
 
 body.checkout-payment-page .payment-actions .btn {
@@ -3612,6 +3622,14 @@ body.checkout-payment-page .payment-actions .btn:disabled {
     flex-direction: column;
   }
 
+  .payment-method-actions {
+    flex-direction: column;
+  }
+
+  .payment-method-actions .btn {
+    width: 100%;
+  }
+
   .buy-now-modal {
     align-items: flex-end;
     padding: 0;
@@ -4204,6 +4222,11 @@ body.checkout-payment-page .payment-actions .btn:disabled {
 .admin-badge--draft {
   background: rgba(211, 128, 34, 0.15);
   color: #875113;
+}
+
+.admin-badge--waiting-confirmation {
+  background: rgba(80, 0, 0, 0.12);
+  color: var(--maroon);
 }
 
 .admin-badge--cancelled,

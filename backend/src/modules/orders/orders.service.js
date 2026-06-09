@@ -59,6 +59,7 @@ const createOrder = async (userId, payload) => {
     const shippingFee = config.checkoutShippingFee;
     const discountAmount = 0;
     const total = subtotal + shippingFee - discountAmount;
+    const paymentMethod = payload.paymentMethod || 'BANK_TRANSFER';
 
     const savedOrder = await ordersRepository.create(
       {
@@ -70,7 +71,7 @@ const createOrder = async (userId, payload) => {
         shippingCountry: 'Viet Nam',
         status: 'PENDING',
         paymentStatus: 'UNPAID',
-        paymentMethod: 'BANK_TRANSFER',
+        paymentMethod,
         subtotal: toMoney(subtotal),
         shippingFee: toMoney(shippingFee),
         discountAmount: toMoney(discountAmount),
@@ -99,6 +100,14 @@ const createOrder = async (userId, payload) => {
       tx,
     );
 
+    if (paymentMethod === 'COD') {
+      await removeOrderItemsFromCart({
+        userId,
+        orderItems: savedOrder.items,
+        tx,
+      });
+    }
+
     return savedOrder;
   });
 
@@ -115,7 +124,7 @@ const getOrder = async (userId, code) => {
   return serializeOrder(order);
 };
 
-const removeReportedOrderItemsFromCart = async ({ userId, orderItems, tx }) => {
+const removeOrderItemsFromCart = async ({ userId, orderItems, tx }) => {
   const cart = await ordersRepository.findCartForCheckout(userId, tx);
 
   if (!cart || cart.items.length === 0) {
@@ -165,7 +174,7 @@ const reportPaid = async (userId, code) => {
       return existingOrder;
     }
 
-    await removeReportedOrderItemsFromCart({
+    await removeOrderItemsFromCart({
       userId,
       orderItems: existingOrder.items,
       tx,
@@ -183,8 +192,43 @@ const reportPaid = async (userId, code) => {
   return serializeOrder(order);
 };
 
+const useCashOnDelivery = async (userId, code) => {
+  const order = await ordersRepository.transaction(async (tx) => {
+    const existingOrder = await ordersRepository.findByCodeForUser({ userId, code }, tx);
+
+    if (!existingOrder) {
+      throw new AppError('Order not found', 404);
+    }
+
+    if (existingOrder.paymentStatus === 'PAID' || existingOrder.paymentReportedAt) {
+      throw new AppError('Order payment has already been reported or confirmed', 409);
+    }
+
+    if (existingOrder.paymentMethod === 'COD') {
+      return existingOrder;
+    }
+
+    await removeOrderItemsFromCart({
+      userId,
+      orderItems: existingOrder.items,
+      tx,
+    });
+
+    return ordersRepository.updatePaymentMethod(
+      {
+        orderId: existingOrder.id,
+        paymentMethod: 'COD',
+      },
+      tx,
+    );
+  });
+
+  return serializeOrder(order);
+};
+
 module.exports = {
   createOrder,
   getOrder,
   reportPaid,
+  useCashOnDelivery,
 };

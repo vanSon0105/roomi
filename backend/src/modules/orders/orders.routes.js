@@ -14,6 +14,7 @@ router.use(authMiddleware);
 
 router.post('/', validate(createOrderSchema), ordersController.createOrder);
 router.post('/:code/report-paid', validate(orderCodeParamSchema), ordersController.reportPaid);
+router.post('/:code/cash-on-delivery', validate(orderCodeParamSchema), ordersController.useCashOnDelivery);
 router.get('/:code', validate(orderCodeParamSchema), ordersController.getOrder);
 
 module.exports = router;

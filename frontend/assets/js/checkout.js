@@ -99,12 +99,28 @@ function bindCopyButtons() {
   });
 }
 
+function isCashOnDelivery(order) {
+  return order.paymentMethod === 'COD' || order.payment?.provider === 'COD';
+}
+
 function renderReportPaidAction(order) {
+  if (isCashOnDelivery(order)) {
+    return '';
+  }
+
   if (order.paymentReportedAt || order.payment?.reported) {
     return '<button class="btn btn-maroon" type="button" disabled>Đã báo chuyển khoản</button>';
   }
 
   return `<button class="btn btn-maroon" type="button" data-report-paid="${escapeHtml(order.code)}">Tôi đã chuyển khoản</button>`;
+}
+
+function renderCashOnDeliveryAction(order) {
+  if (isCashOnDelivery(order) || order.paymentReportedAt || order.payment?.reported || order.paymentStatus === 'PAID') {
+    return '';
+  }
+
+  return `<button class="btn btn-outline" type="button" data-cod-order="${escapeHtml(order.code)}">Thanh toán khi nhận hàng</button>`;
 }
 
 function bindReportPaidButton() {
@@ -124,6 +140,34 @@ function bindReportPaidButton() {
 
       sessionStorage.removeItem(SELECTED_CART_STORAGE_KEY);
       renderOrderPayment(response.data, { successView: true });
+    } catch (error) {
+      button.disabled = false;
+      button.textContent = error.message || previousText;
+
+      window.setTimeout(() => {
+        button.textContent = previousText;
+      }, 1800);
+    }
+  });
+}
+
+function bindCashOnDeliveryButton() {
+  const button = document.querySelector('[data-cod-order]');
+
+  button?.addEventListener('click', async () => {
+    const code = button.dataset.codOrder;
+    const previousText = button.textContent;
+
+    button.disabled = true;
+    button.textContent = 'Đang cập nhật...';
+
+    try {
+      const response = await apiFetch(`/orders/${encodeURIComponent(code)}/cash-on-delivery`, {
+        method: 'POST',
+      });
+
+      sessionStorage.removeItem(SELECTED_CART_STORAGE_KEY);
+      renderCashOnDeliverySuccess(response.data);
     } catch (error) {
       button.disabled = false;
       button.textContent = error.message || previousText;
@@ -162,6 +206,12 @@ function renderPaymentRows(order) {
 
 function renderOrderPayment(order, { successView = false } = {}) {
   if (!root) return;
+
+  if (isCashOnDelivery(order)) {
+    renderCashOnDeliverySuccess(order);
+    return;
+  }
+
   setPaymentLayout(true);
 
   const payment = order.payment || {};
@@ -195,6 +245,7 @@ function renderOrderPayment(order, { successView = false } = {}) {
         </div>
         <div class="payment-actions">
           ${renderReportPaidAction(order)}
+          ${renderCashOnDeliveryAction(order)}
           <a class="btn btn-outline" href="${pageHref('products.html')}">Tiếp tục mua sắm</a>
         </div>
       </div>
@@ -203,10 +254,32 @@ function renderOrderPayment(order, { successView = false } = {}) {
 
   bindCopyButtons();
   bindReportPaidButton();
+  bindCashOnDeliveryButton();
   observeReveal();
 }
 
-function getFormPayload(form) {
+function renderCashOnDeliverySuccess(order) {
+  if (!root) return;
+  setFormLayout(false);
+
+  root.innerHTML = `
+    <section class="locked-state container reveal">
+      <div>
+        <p class="section-kicker">ĐẶT HÀNG THÀNH CÔNG</p>
+        <h1>Thanh toán khi nhận hàng</h1>
+        <p>Đơn ${escapeHtml(order.code)} đã được ghi nhận. ROOMI sẽ liên hệ xác nhận và bạn thanh toán ${formatCurrency(order.total)} khi nhận hàng.</p>
+        <div class="payment-actions payment-actions--center">
+          <a class="btn btn-maroon" href="${pageHref('products.html')}">Tiếp tục mua sắm</a>
+          <a class="btn btn-outline" href="${homeHref}">Về trang chủ</a>
+        </div>
+      </div>
+    </section>
+  `;
+
+  observeReveal();
+}
+
+function getFormPayload(form, paymentMethod = 'BANK_TRANSFER') {
   const formData = new FormData(form);
 
   return {
@@ -215,13 +288,14 @@ function getFormPayload(form) {
     email: formData.get('email')?.toString() || '',
     address: formData.get('address')?.toString() || '',
     note: formData.get('note')?.toString() || '',
+    paymentMethod,
     cartItemIds: readSelectedCartItemIds() || undefined,
   };
 }
 
 function bindCheckoutForm() {
   const form = root?.querySelector('[data-checkout-form]');
-  const submitButton = form?.querySelector('[type="submit"]');
+  const submitButtons = Array.from(form?.querySelectorAll('[data-payment-method]') || []);
   const notice = form?.querySelector('[data-checkout-notice]');
 
   form?.addEventListener('submit', async (event) => {
@@ -231,26 +305,41 @@ function bindCheckoutForm() {
       notice.textContent = '';
     }
 
+    const submitButton = event.submitter?.closest('[data-payment-method]') || submitButtons[0];
+    const paymentMethod = submitButton?.dataset.paymentMethod || 'BANK_TRANSFER';
+    const previousText = submitButton?.textContent;
+
+    submitButtons.forEach((button) => {
+      button.disabled = true;
+    });
+
     if (submitButton) {
-      submitButton.disabled = true;
-      submitButton.textContent = 'Đang tạo QR...';
+      submitButton.textContent = paymentMethod === 'COD' ? 'Đang đặt hàng...' : 'Đang tạo QR...';
     }
 
     try {
       const response = await apiFetch('/orders', {
         method: 'POST',
-        body: JSON.stringify(getFormPayload(form)),
+        body: JSON.stringify(getFormPayload(form, paymentMethod)),
       });
 
-      renderOrderPayment(response.data);
+      if (paymentMethod === 'COD') {
+        sessionStorage.removeItem(SELECTED_CART_STORAGE_KEY);
+        renderCashOnDeliverySuccess(response.data);
+      } else {
+        renderOrderPayment(response.data);
+      }
     } catch (error) {
       if (notice) {
         notice.textContent = error.message || 'Không tạo được đơn hàng.';
       }
 
-      if (submitButton) {
-        submitButton.disabled = false;
-        submitButton.textContent = 'Chuyển khoản VietQR';
+      submitButtons.forEach((button) => {
+        button.disabled = false;
+      });
+
+      if (submitButton && previousText) {
+        submitButton.textContent = previousText;
       }
     }
   });
@@ -299,7 +388,10 @@ function renderCheckout(cart) {
 
           <div class="payment-row">
             <span>Thanh toán</span>
-            <button class="btn btn-maroon payment-submit" type="submit">Chuyển khoản VietQR</button>
+            <div class="payment-method-actions">
+              <button class="btn btn-maroon payment-submit" type="submit" data-payment-method="BANK_TRANSFER">Chuyển khoản VietQR</button>
+              <button class="btn btn-outline payment-submit" type="submit" data-payment-method="COD">Thanh toán khi nhận hàng</button>
+            </div>
             <p class="checkout-notice" data-checkout-notice></p>
           </div>
         </form>
@@ -337,7 +429,7 @@ function renderCheckout(cart) {
       </div>
       <div>
         <strong>Ghi chú</strong>
-        <p>Đơn hàng sẽ được giữ ở trạng thái chờ thanh toán cho đến khi ROOMI đối soát chuyển khoản.</p>
+        <p>Chọn VietQR để quét mã chuyển khoản, hoặc chọn thanh toán khi nhận hàng nếu bạn muốn trả tiền lúc giao hàng.</p>
       </div>
     </section>
     <section class="checkout-total">

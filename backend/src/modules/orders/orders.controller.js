@@ -30,8 +30,18 @@ const reportPaid = asyncHandler(async (req, res) => {
   });
 });
 
+const useCashOnDelivery = asyncHandler(async (req, res) => {
+  const data = await ordersService.useCashOnDelivery(req.user.id, req.validated.params.code);
+
+  sendSuccess(res, {
+    message: 'Payment method updated to cash on delivery',
+    data,
+  });
+});
+
 module.exports = {
   createOrder,
   getOrder,
   reportPaid,
+  useCashOnDelivery,
 };

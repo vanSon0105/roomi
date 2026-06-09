@@ -63,6 +63,17 @@ const updatePaymentReportedAt = ({ orderId, paymentReportedAt }, client) =>
     include: orderInclude,
   });
 
+const updatePaymentMethod = ({ orderId, paymentMethod, paymentStatus = 'UNPAID', paymentReportedAt = null }, client) =>
+  withClient(client).order.update({
+    where: { id: orderId },
+    data: {
+      paymentMethod,
+      paymentStatus,
+      paymentReportedAt,
+    },
+    include: orderInclude,
+  });
+
 module.exports = {
   clearCart,
   create,
@@ -71,5 +82,6 @@ module.exports = {
   findCartForCheckout,
   transaction,
   updateCartItemQuantity,
+  updatePaymentMethod,
   updatePaymentReportedAt,
 };

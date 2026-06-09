@@ -160,9 +160,10 @@ Orders:
 POST /orders
 GET /orders/:code
 POST /orders/:code/report-paid
+POST /orders/:code/cash-on-delivery
 ```
 
-`POST /orders` creates a pending bank-transfer order and QR, but keeps the cart unchanged. `POST /orders/:code/report-paid` records that the customer clicked "Tôi đã chuyển khoản" and removes only the ordered product quantities from the cart. The order still remains `paymentStatus=UNPAID` until admin/bank reconciliation confirms the money.
+`POST /orders` accepts `paymentMethod=BANK_TRANSFER|COD`. Bank-transfer orders create a pending VietQR order and keep the cart unchanged. `POST /orders/:code/report-paid` records that the customer clicked "Tôi đã chuyển khoản" and removes only the ordered product quantities from the cart. COD orders, or `POST /orders/:code/cash-on-delivery`, remove the ordered product quantities from the cart immediately. The order still remains `paymentStatus=UNPAID` until admin confirms the money.
 
 Users:
 

@@ -4,10 +4,12 @@ import {
   formatCurrency,
   formatDate,
   mediaUrl,
+  paymentMethodLabel,
+  paymentStatusBadge,
   renderAdminError,
   renderAdminShell,
   statusBadge,
-} from './admin-common.js';
+} from './admin-common.js?v=admin-cod-1';
 
 renderAdminShell('dashboard');
 
@@ -59,7 +61,8 @@ function renderDashboard(data) {
                   </div>
                   <div>
                     <strong>${formatCurrency(order.total)}</strong>
-                    ${statusBadge('payment', order.paymentStatus)}
+                    ${paymentStatusBadge(order)}
+                    <span>${escapeHtml(paymentMethodLabel(order.paymentMethod))}</span>
                   </div>
                 </a>
               `,

@@ -24,6 +24,17 @@ const paymentStatusLabels = {
   REFUNDED: 'Hoàn tiền',
 };
 
+const paymentDisplayLabels = {
+  ...paymentStatusLabels,
+  WAITING_CONFIRMATION: 'Chờ xác nhận',
+};
+
+const paymentMethodLabels = {
+  BANK_TRANSFER: 'Chuyển khoản VietQR',
+  COD: 'Thanh toán khi nhận hàng',
+  ONLINE: 'Thanh toán online',
+};
+
 const productStatusLabels = {
   DRAFT: 'Bản nháp',
   ACTIVE: 'Đang bán',
@@ -68,7 +79,7 @@ export function mediaUrl(path) {
 export function labelOf(type, value) {
   const maps = {
     order: orderStatusLabels,
-    payment: paymentStatusLabels,
+    payment: paymentDisplayLabels,
     product: productStatusLabels,
     role: roleLabels,
   };
@@ -81,15 +92,40 @@ export function statusBadge(type, value) {
   return `<span class="admin-badge admin-badge--${normalized}">${escapeHtml(labelOf(type, value))}</span>`;
 }
 
+export function isPaymentReported(order) {
+  return Boolean(order?.paymentReportedAt || order?.payment?.reported || order?.payment?.reportedAt);
+}
+
+export function paymentDisplayStatus(order) {
+  if (order?.paymentStatus === 'UNPAID' && isPaymentReported(order)) {
+    return 'WAITING_CONFIRMATION';
+  }
+
+  return order?.paymentStatus || '';
+}
+
+export function paymentStatusBadge(order) {
+  return statusBadge('payment', paymentDisplayStatus(order));
+}
+
+export function paymentMethodLabel(value) {
+  return paymentMethodLabels[value] || value || 'Chưa rõ phương thức';
+}
+
 export function orderStatusOptions(value) {
   return Object.entries(orderStatusLabels)
     .map(([key, label]) => `<option value="${key}" ${key === value ? 'selected' : ''}>${label}</option>`)
     .join('');
 }
 
-export function paymentStatusOptions(value) {
+export function paymentStatusOptions(value, { order, reported = false } = {}) {
+  const isWaitingConfirmation = value === 'UNPAID' && (reported || isPaymentReported(order));
+
   return Object.entries(paymentStatusLabels)
-    .map(([key, label]) => `<option value="${key}" ${key === value ? 'selected' : ''}>${label}</option>`)
+    .map(([key, label]) => {
+      const displayLabel = key === 'UNPAID' && isWaitingConfirmation ? paymentDisplayLabels.WAITING_CONFIRMATION : label;
+      return `<option value="${key}" ${key === value ? 'selected' : ''}>${displayLabel}</option>`;
+    })
     .join('');
 }
 

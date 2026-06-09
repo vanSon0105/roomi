@@ -3,14 +3,16 @@ import {
   escapeHtml,
   formatCurrency,
   formatDate,
+  paymentMethodLabel,
   orderStatusOptions,
+  paymentStatusBadge,
   paymentStatusOptions,
   renderAdminEmpty,
   renderAdminError,
   renderAdminShell,
   renderPagination,
   statusBadge,
-} from './admin-common.js';
+} from './admin-common.js?v=admin-cod-1';
 
 renderAdminShell('orders');
 
@@ -96,8 +98,9 @@ function renderOrderRows(orders) {
               </div>
               <strong>${formatCurrency(order.total)}</strong>
               <div>
-                ${statusBadge('payment', order.paymentStatus)}
-                <select data-payment-status="${escapeHtml(order.code)}">${paymentStatusOptions(order.paymentStatus)}</select>
+                ${paymentStatusBadge(order)}
+                <small>${escapeHtml(paymentMethodLabel(order.paymentMethod))}</small>
+                <select data-payment-status="${escapeHtml(order.code)}">${paymentStatusOptions(order.paymentStatus, { order })}</select>
               </div>
               <div>
                 ${statusBadge('order', order.status)}
@@ -144,7 +147,11 @@ function renderOrderDetail(order) {
     <div class="admin-drawer-grid">
       <div>
         <span>Thanh toán</span>
-        ${statusBadge('payment', order.paymentStatus)}
+        ${paymentStatusBadge(order)}
+      </div>
+      <div>
+        <span>Phương thức</span>
+        <strong>${escapeHtml(paymentMethodLabel(order.paymentMethod))}</strong>
       </div>
       <div>
         <span>Trạng thái</span>

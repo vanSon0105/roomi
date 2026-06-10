@@ -49,14 +49,34 @@ const productIdParamSchema = z.object({
   }),
 });
 
+const createProductSchema = z.object({
+  body: z.object({
+    name: z.string().trim().min(2).max(180),
+    slug: z.string().trim().min(2).max(200).optional(),
+    categoryId: z.coerce.number().int().positive().nullable().optional(),
+    price: z.coerce.number().nonnegative(),
+    compareAtPrice: z.coerce.number().nonnegative().nullable().optional(),
+    stock: z.coerce.number().int().nonnegative().default(0),
+    sku: z.string().trim().max(80).nullable().optional(),
+    shortDescription: z.string().trim().max(500).nullable().optional(),
+    description: z.string().trim().max(10000).nullable().optional(),
+    status: z.enum(productStatuses).default('DRAFT'),
+    isFeatured: z.boolean().default(false),
+  }),
+});
+
 const updateProductSchema = productIdParamSchema.extend({
   body: z
     .object({
       name: z.string().trim().min(2).max(180).optional(),
+      slug: z.string().trim().min(2).max(200).optional(),
+      categoryId: z.coerce.number().int().positive().nullable().optional(),
       sku: z.string().trim().max(80).nullable().optional(),
       price: z.coerce.number().nonnegative().optional(),
       compareAtPrice: z.coerce.number().nonnegative().nullable().optional(),
       stock: z.coerce.number().int().nonnegative().optional(),
+      shortDescription: z.string().trim().max(500).nullable().optional(),
+      description: z.string().trim().max(10000).nullable().optional(),
       status: z.enum(productStatuses).optional(),
       isFeatured: z.boolean().optional(),
     })
@@ -91,10 +111,12 @@ const updateUserSchema = userIdParamSchema.extend({
 });
 
 module.exports = {
+  createProductSchema,
   listOrdersSchema,
   listProductsSchema,
   listUsersSchema,
   orderCodeParamSchema,
+  productIdParamSchema,
   updateOrderSchema,
   updateProductSchema,
   updateUserSchema,

@@ -4269,6 +4269,34 @@ body.checkout-payment-page .payment-actions .btn:disabled {
   border-top: 1px solid rgba(80, 0, 0, 0.08);
 }
 
+.admin-row-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.admin-icon-btn {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--maroon);
+  cursor: pointer;
+  font-size: 18px;
+  transition: background 200ms;
+}
+
+.admin-icon-btn:hover {
+  background: rgba(80,0,0,0.08);
+}
+
+.admin-icon-btn--danger:hover {
+  background: rgba(229,57,53,0.12);
+  color: #e53935;
+}
+
 .admin-table-row > div,
 .admin-table-row > strong,
 .admin-table-row > span {
@@ -4447,11 +4475,11 @@ body.checkout-payment-page .payment-actions .btn:disabled {
 }
 
 .admin-drawer-head h2 {
-  margin: 8px 0;
+  margin: 6px 0;
   font-family: var(--display);
-  font-size: 56px;
+  font-size: 36px;
   font-weight: 400;
-  line-height: 0.9;
+  line-height: 1;
 }
 
 .admin-drawer-grid {
@@ -4488,6 +4516,121 @@ body.checkout-payment-page .payment-actions .btn:disabled {
 .admin-drawer-item:first-of-type {
   border-top: 0;
 }
+
+.admin-drawer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 4px;
+  padding-bottom: 20px;
+}
+
+.admin-drawer-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-drawer-form label > span:first-child {
+  font-weight: 900;
+  font-size: 13px;
+  color: var(--maroon);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.admin-drawer-form .roomi-input,
+.admin-drawer-form select {
+  width: 100%;
+  height: auto;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border: 1px solid rgba(80,0,0,0.18);
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: var(--copy);
+  font-weight: 400;
+  background: #fff;
+  transition: border-color 200ms;
+}
+
+.admin-drawer-form .roomi-input:focus,
+.admin-drawer-form select:focus {
+  border-color: var(--maroon);
+  outline: none;
+}
+
+.admin-drawer-form textarea.roomi-input {
+  resize: vertical;
+  min-height: 60px;
+  height: auto;
+  padding: 10px 14px;
+}
+
+.admin-drawer-form .admin-switch {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.admin-drawer-form .admin-switch strong {
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--maroon);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.admin-drawer-form .admin-switch > span {
+  position: relative;
+  width: 46px;
+  height: 26px;
+  flex: none;
+  border-radius: 999px;
+  background: rgba(80, 0, 0, 0.16);
+  transition: background 420ms var(--fluid);
+}
+
+.admin-drawer-form .admin-switch > span::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(80, 0, 0, 0.18);
+  transition: transform 420ms var(--fluid);
+}
+
+.admin-drawer-form .admin-switch input:checked + span {
+  background: var(--maroon);
+}
+
+.admin-drawer-form .admin-switch input:checked + span::after {
+  transform: translateX(20px);
+}
+
+.admin-drawer-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(80,0,0,0.08);
+}
+
+.admin-product-images { display: flex; flex-direction: column; gap: 10px; }
+.admin-product-images > span:first-child { font-weight: 900; font-size: 13px; color: var(--maroon); text-transform: uppercase; letter-spacing: 0.4px; }
+.admin-product-images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
+.admin-product-image-item { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 1px solid rgba(80,0,0,0.12); }
+.admin-product-image-item img { width: 100%; height: 100%; object-fit: cover; }
+.admin-product-image-delete { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; border-radius: 50%; background: rgba(229,57,53,0.9); color: #fff; font-size: 16px; line-height: 1; cursor: pointer; display: grid; place-items: center; }
+.admin-product-image-add { display: inline-flex; cursor: pointer; }
+.admin-product-image-add input[type="file"] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.admin-product-image-add span { padding: 8px 16px; border: 1px dashed rgba(80,0,0,0.3); border-radius: 10px; font-size: 13px; font-weight: 800; color: var(--maroon); cursor: pointer; transition: background 200ms; }
+.admin-product-image-add span:hover { background: rgba(80,0,0,0.06); }
 
 @media (max-width: 1180px) {
   .account-shell {

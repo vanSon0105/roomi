@@ -1,4 +1,5 @@
 const adminService = require('./admin.service');
+const { serializeProduct } = require('../products/products.presenter');
 const asyncHandler = require('../../utils/async-handler');
 const { sendSuccess } = require('../../utils/api-response');
 
@@ -74,13 +75,65 @@ const updateUser = asyncHandler(async (req, res) => {
   });
 });
 
+const createProduct = asyncHandler(async (req, res) => {
+  const data = await adminService.createProduct(req.validated.body);
+
+  sendSuccess(res, {
+    statusCode: 201,
+    message: 'Product created successfully',
+    data,
+  });
+});
+
+const getProductById = asyncHandler(async (req, res) => {
+  const data = await adminService.getProductById(req.validated.params.id);
+
+  sendSuccess(res, {
+    message: 'Product fetched successfully',
+    data,
+  });
+});
+
+const deleteProduct = asyncHandler(async (req, res) => {
+  await adminService.deleteProduct(req.validated.params.id);
+
+  sendSuccess(res, {
+    message: 'Product deleted successfully',
+    data: null,
+  });
+});
+
+const uploadProductImages = asyncHandler(async (req, res) => {
+  const data = await adminService.uploadProductImages(req.validated.params.id, req.files || []);
+
+  sendSuccess(res, {
+    statusCode: 201,
+    message: 'Images uploaded successfully',
+    data: serializeProduct(data),
+  });
+});
+
+const deleteProductImage = asyncHandler(async (req, res) => {
+  const data = await adminService.deleteProductImage(req.validated.params.id, Number(req.params.imageId));
+
+  sendSuccess(res, {
+    message: 'Image deleted successfully',
+    data: serializeProduct(data),
+  });
+});
+
 module.exports = {
+  createProduct,
+  deleteProduct,
+  deleteProductImage,
   getOrderByCode,
   getOrders,
+  getProductById,
   getProducts,
   getStats,
   getUsers,
   updateOrder,
   updateProduct,
   updateUser,
+  uploadProductImages,
 };

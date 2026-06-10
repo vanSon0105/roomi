@@ -414,7 +414,91 @@ const updateUser = async (id, payload) => {
   return serializeAdminUser(user);
 };
 
+const createProduct = async (payload) => {
+  const slug =
+    payload.slug ||
+    payload.name
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 200) +
+      '-' +
+      Date.now().toString(36);
+
+  const data = { ...payload, slug };
+  if (data.price != null) data.price = toMoney(data.price);
+  if (data.compareAtPrice != null) data.compareAtPrice = toMoney(data.compareAtPrice);
+
+  const product = await prisma.product.create({
+    data,
+    include: productInclude,
+  });
+
+  return serializeProduct(product);
+};
+
+const getProductById = async (id) => {
+  const product = await prisma.product.findUnique({
+    where: { id },
+    include: productInclude,
+  });
+  if (!product) throw new AppError('Product not found', 404);
+  return serializeProduct(product);
+};
+
+const deleteProduct = async (id) => {
+  const product = await prisma.product.findUnique({ where: { id } });
+  if (!product) throw new AppError('Product not found', 404);
+
+  await prisma.product.delete({ where: { id } });
+};
+
+const uploadProductImages = async (productId, files) => {
+  const product = await prisma.product.findUnique({ where: { id: productId } });
+  if (!product) throw new AppError('Product not found', 404);
+
+  const images = await Promise.all(
+    files.map((file, i) =>
+      prisma.productImage.create({
+        data: {
+          productId,
+          imageUrl: `assets/images/products/${file.filename}`,
+          altText: product.name,
+          sortOrder: i,
+          isPrimary: false,
+        },
+      }),
+    ),
+  );
+
+  return prisma.product.findUnique({ where: { id: productId }, include: productInclude });
+};
+
+const deleteProductImage = async (productId, imageId) => {
+  const image = await prisma.productImage.findFirst({ where: { id: imageId, productId } });
+  if (!image) throw new AppError('Image not found', 404);
+
+  await prisma.productImage.delete({ where: { id: imageId } });
+
+  // Try to delete file
+  try {
+    const fs = require('fs');
+    const imgPath = require('path').resolve(__dirname, '..', '..', '..', '..', 'frontend', image.imageUrl);
+    fs.unlinkSync(imgPath);
+  } catch (_) { /* file may not exist */ }
+
+  return prisma.product.findUnique({ where: { id: productId }, include: productInclude });
+};
+
 module.exports = {
+  createProduct,
+  deleteProduct,
+  deleteProductImage,
+  getOrderByCode,
+  getOrders,
+  getProductById,
   getOrderByCode,
   getOrders,
   getProducts,
@@ -423,4 +507,5 @@ module.exports = {
   updateOrder,
   updateProduct,
   updateUser,
+  uploadProductImages,
 };

@@ -64,10 +64,11 @@ model User {
   birthday  DateTime? @db.Date
   password  String
   role      Role      @default(USER)
-  cart      Cart?
-  addresses Address[]
-  orders    Order[]
-  createdAt DateTime  @default(now())
+  cart         Cart?
+  addresses    Address[]
+  orders       Order[]
+  chatMessages ChatMessage[]
+  createdAt    DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
   @@map("users")
@@ -260,4 +261,21 @@ model Setting {
   value String @db.Text
 
   @@map("settings")
+}
+
+model ChatMessage {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  guestId   String?
+  name      String   @default("Khách")
+  message   String   @db.Text
+  isAdmin   Boolean  @default(false)
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([guestId, createdAt])
+  @@map("chat_messages")
 }

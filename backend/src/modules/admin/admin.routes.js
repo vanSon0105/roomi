@@ -1,6 +1,7 @@
 const express = require('express');
 
 const adminController = require('./admin.controller');
+const chatController = require('../chat/chat.controller');
 const settingsController = require('../settings/settings.controller');
 const adminMiddleware = require('../../middlewares/admin.middleware');
 const authMiddleware = require('../../middlewares/auth.middleware');
@@ -15,6 +16,7 @@ const {
   updateUserSchema,
 } = require('./admin.validation');
 const { updateSettingsSchema } = require('../settings/settings.validation');
+const { adminReplySchema } = require('../chat/chat.validation');
 
 const router = express.Router();
 
@@ -30,5 +32,9 @@ router.get('/products', validate(listProductsSchema), adminController.getProduct
 router.patch('/products/:id', validate(updateProductSchema), adminController.updateProduct);
 router.get('/users', validate(listUsersSchema), adminController.getUsers);
 router.patch('/users/:id', validate(updateUserSchema), adminController.updateUser);
+router.get('/chat/conversations', chatController.getConversations);
+router.get('/chat/unread', chatController.getUnreadCount);
+router.get('/chat/:key', chatController.getConversation);
+router.post('/chat/:key', validate(adminReplySchema), chatController.adminReply);
 
 module.exports = router;

@@ -209,18 +209,11 @@ export function renderShell(page = '') {
         <img src="${chatIconSrc}" alt="">
       </button>
       <aside class="chat-panel" data-chat-panel aria-hidden="true">
-        <div class="chat-line">
-          <div class="chat-avatar">R</div>
-          <p class="chat-bubble dark">Hi bạn, đang muốn decor vibe gì nè?</p>
-        </div>
-        <div class="chat-line right">
-          <p class="chat-bubble light">Add Name & Type Something...</p>
-          <div class="chat-avatar">B</div>
-        </div>
-        <div class="chat-line">
-          <div class="chat-avatar">A</div>
-          <p class="chat-bubble dark">Decor phòng ngủ hay góc chill vậy?</p>
-        </div>
+        <div class="chat-messages" data-chat-messages></div>
+        <form class="chat-send" data-chat-form>
+          <input name="message" placeholder="Nhập tin nhắn..." autocomplete="off" required>
+          <button type="submit">Gửi</button>
+        </form>
       </aside>
     `;
   }
@@ -228,6 +221,7 @@ export function renderShell(page = '') {
   bindCommonInteractions();
   syncAccountState();
   observeReveal();
+  initChatPolling();
 }
 
 function markAuthenticatedAccount(user) {
@@ -263,10 +257,37 @@ function markAuthenticatedAccount(user) {
   });
 
   if (user?.role === 'ADMIN') {
+    currentUserIsAdmin = true;
     document.querySelectorAll('[data-admin-link], [data-mobile-admin-link]').forEach((link) => {
       link.hidden = false;
     });
+    pollUnreadCount();
   }
+}
+
+let unreadPollTimer = null;
+
+async function pollUnreadCount() {
+  if (unreadPollTimer) clearTimeout(unreadPollTimer);
+  try {
+    const r = await fetch('/api/admin/chat/unread', { credentials: 'include' }).then(r => r.json());
+    const count = r?.data?.count || 0;
+    const badge = document.querySelector('[data-chat-badge]');
+    const button = document.querySelector('[data-chat-button]');
+    if (count > 0) {
+      if (!badge) {
+        const span = document.createElement('span');
+        span.setAttribute('data-chat-badge', '');
+        span.className = 'chat-badge';
+        button?.appendChild(span);
+      }
+      const el = badge || document.querySelector('[data-chat-badge]');
+      if (el) el.textContent = count > 99 ? '99+' : String(count);
+    } else if (badge) {
+      badge.remove();
+    }
+  } catch (_) {}
+  unreadPollTimer = setTimeout(pollUnreadCount, 15000);
 }
 
 async function syncAccountState() {
@@ -347,11 +368,7 @@ function bindCommonInteractions() {
     drawer?.setAttribute('aria-hidden', 'true');
   });
 
-  const chatPanel = document.querySelector('[data-chat-panel]');
-  document.querySelector('[data-chat-button]')?.addEventListener('click', () => {
-    chatPanel?.classList.toggle('is-open');
-    chatPanel?.setAttribute('aria-hidden', chatPanel.classList.contains('is-open') ? 'false' : 'true');
-  });
+  // Chat toggle handled in initChatPolling
 }
 
 export function observeReveal() {
@@ -377,3 +394,162 @@ export function observeReveal() {
 
   targets.forEach((target) => observer.observe(target));
 }
+
+// --- Chat ---
+let chatPollTimer = null;
+
+function getChatGuestId() {
+  let id = localStorage.getItem('roomi_chat_guest');
+  if (!id) {
+    id = 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    localStorage.setItem('roomi_chat_guest', id);
+  }
+  return id;
+}
+
+function chatApiFetch(path, options = {}) {
+  const separator = path.includes('?') ? '&' : '?';
+  return fetch(`/api/chat${path}${separator}guestId=${getChatGuestId()}`, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    ...options,
+  }).then((r) => r.json());
+}
+
+function escapeChatHtml(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function chatAvatarUrl(url) {
+  if (!url) return null;
+  if (/^(https?:|data:|blob:)/.test(url)) return url;
+  return `${rootPrefix}${url.replace(/^\/+/, '')}`;
+}
+
+function chatAvatarHtml(msg) {
+  const avatarUrl = chatAvatarUrl(msg.user?.avatarUrl);
+  const initial = (msg.name || 'K')[0].toUpperCase();
+  if (avatarUrl) {
+    return `<img class="chat-avatar-img" src="${escapeChatHtml(avatarUrl)}" alt="${initial}" onerror="this.outerHTML='<div class=chat-avatar>${initial}</div>'">`;
+  }
+  return `<div class="chat-avatar">${initial}</div>`;
+}
+
+function renderChatMessages(messages) {
+  const container = document.querySelector('[data-chat-messages]');
+  if (!container) return;
+  if (!messages.length) {
+    container.innerHTML = '<p class="chat-muted">Hãy bắt đầu chat với admin nếu có vấn đề gì cần giải đáp.</p>';
+    return;
+  }
+  container.innerHTML = messages
+    .map(
+      (m) => `
+        <div class="chat-line ${m.isAdmin ? '' : 'right'}">
+          ${m.isAdmin ? chatAvatarHtml(m) : ''}
+          <p class="chat-bubble ${m.isAdmin ? 'dark' : 'light'}">${escapeChatHtml(m.message)}</p>
+          ${!m.isAdmin ? chatAvatarHtml(m) : ''}
+        </div>
+      `,
+    )
+    .join('');
+  container.scrollTop = container.scrollHeight;
+}
+
+async function loadChatMessages() {
+  try {
+    const response = await chatApiFetch('');
+    if (response.success && response.data) {
+      renderChatMessages(response.data);
+    }
+  } catch (_error) { /* ignore */ }
+}
+
+function stopChatPolling() {
+  if (chatPollTimer) {
+    window.clearTimeout(chatPollTimer);
+    chatPollTimer = null;
+  }
+}
+
+function initChatPolling() {
+  const panel = document.querySelector('[data-chat-panel]');
+  const button = document.querySelector('[data-chat-button]');
+  if (!panel || !button) return;
+
+  button.addEventListener('click', async () => {
+    // Admin → redirect to admin chat page
+    if (currentUserIsAdmin) {
+      window.location.href = pageHref('admin/chat.html');
+      return;
+    }
+    // Double-check in case sync hasn't completed yet
+    try {
+      const r = await fetch('/api/auth/me', { credentials: 'include' }).then(r => r.json());
+      if (r?.data?.user?.role === 'ADMIN') {
+        window.location.href = pageHref('admin/chat.html');
+        return;
+      }
+    } catch (_) {}
+
+    const isOpening = !panel.classList.contains('is-open');
+    panel.classList.toggle('is-open');
+    panel.setAttribute('aria-hidden', panel.classList.contains('is-open') ? 'false' : 'true');
+    if (isOpening) {
+      loadChatMessages();
+      stopChatPolling();
+      pollChat();
+    }
+  });
+
+  const pollChat = async () => {
+    if (!panel.classList.contains('is-open')) {
+      chatPollTimer = window.setTimeout(pollChat, 3000);
+      return;
+    }
+    await loadChatMessages();
+    chatPollTimer = window.setTimeout(pollChat, 3000);
+  };
+}
+
+function bindChatForm() {
+  const form = document.querySelector('[data-chat-form]');
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const input = form.querySelector('input');
+    const message = input.value.trim();
+    if (!message) return;
+
+    const button = form.querySelector('button');
+    input.disabled = true;
+    button.disabled = true;
+
+    try {
+      await chatApiFetch('', {
+        method: 'POST',
+        body: JSON.stringify({ message }),
+      });
+      input.value = '';
+      await loadChatMessages();
+    } catch (_error) { /* ignore */ }
+    finally {
+      input.disabled = false;
+      button.disabled = false;
+      input.focus();
+    }
+  });
+}
+
+// Bind chat form after DOM is ready
+let chatFormBound = false;
+let currentUserIsAdmin = false;
+document.addEventListener('DOMContentLoaded', () => {
+  if (!chatFormBound) { bindChatForm(); chatFormBound = true; }
+});
+window.addEventListener('load', () => {
+  if (!chatFormBound) { bindChatForm(); chatFormBound = true; }
+});
+

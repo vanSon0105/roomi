@@ -8,6 +8,7 @@ const adminNav = [
   { id: 'products', label: 'Sản phẩm', href: 'products.html', icon: 'ph-package' },
   { id: 'users', label: 'Người dùng', href: 'users.html', icon: 'ph-users-three' },
   { id: 'payment-settings', label: 'Thanh toán', href: 'payment-settings.html', icon: 'ph-credit-card' },
+  { id: 'chat', label: 'Chat', href: 'chat.html', icon: 'ph-chats-circle' },
 ];
 
 const orderStatusLabels = {

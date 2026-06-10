@@ -25,7 +25,7 @@ app.use(
         'script-src': ["'self'", 'https://unpkg.com'],
         'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://unpkg.com'],
         'font-src': ["'self'", 'https://fonts.gstatic.com', 'https://unpkg.com', 'data:'],
-        'img-src': ["'self'", 'data:', 'https://img.vietqr.io', 'https://qr.sepay.vn'],
+        'img-src': ["'self'", 'data:', 'blob:', 'https://img.vietqr.io', 'https://qr.sepay.vn'],
       },
     },
   }),

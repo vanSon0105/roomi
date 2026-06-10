@@ -1,6 +1,24 @@
 const { getTokenFromRequest, verifyToken } = require('../modules/auth/auth-token');
 const AppError = require('../utils/app-error');
 
+// In-memory banned user cache — only stores banned IDs, refreshed every 60s
+let bannedCache = new Set();
+let cacheExpiry = 0;
+
+const refreshBannedCache = async () => {
+  const prisma = require('../config/prisma');
+  const banned = await prisma.user.findMany({
+    where: { isBanned: true },
+    select: { id: true },
+  });
+  bannedCache = new Set(banned.map((u) => u.id));
+  cacheExpiry = Date.now() + 60000;
+};
+
+const invalidateBanCache = () => {
+  cacheExpiry = 0;
+};
+
 const authMiddleware = async (req, _res, next) => {
   const token = getTokenFromRequest(req);
 
@@ -11,14 +29,11 @@ const authMiddleware = async (req, _res, next) => {
   try {
     req.user = verifyToken(token);
 
-    // Check if user has been banned since token was issued
-    const prisma = require('../config/prisma');
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
-      select: { isBanned: true },
-    });
-
-    if (user?.isBanned) {
+    // Check ban status (cached, refreshed every 60s)
+    if (Date.now() > cacheExpiry) {
+      await refreshBannedCache();
+    }
+    if (bannedCache.has(req.user.id)) {
       return next(new AppError('Tài khoản của bạn đã bị khoá. Vui lòng liên hệ admin.', 403));
     }
 
@@ -29,3 +44,4 @@ const authMiddleware = async (req, _res, next) => {
 };
 
 module.exports = authMiddleware;
+module.exports.invalidateBanCache = invalidateBanCache;

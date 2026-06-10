@@ -413,6 +413,11 @@ const updateUser = async (id, payload) => {
     select: userSelect,
   });
 
+  // Invalidate ban cache if ban status changed
+  if (Object.prototype.hasOwnProperty.call(payload, 'isBanned')) {
+    require('../../middlewares/auth.middleware').invalidateBanCache();
+  }
+
   return serializeAdminUser(user);
 };
 

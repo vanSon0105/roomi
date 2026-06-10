@@ -287,7 +287,7 @@ async function pollUnreadCount() {
       badge.remove();
     }
   } catch (_) {}
-  unreadPollTimer = setTimeout(pollUnreadCount, 15000);
+  unreadPollTimer = setTimeout(pollUnreadCount, 30000);
 }
 
 async function syncAccountState() {
@@ -520,7 +520,7 @@ function initChatPolling() {
       return;
     }
     await loadChatMessages();
-    chatPollTimer = window.setTimeout(pollChat, 3000);
+    chatPollTimer = window.setTimeout(pollChat, 10000);
   };
 }
 

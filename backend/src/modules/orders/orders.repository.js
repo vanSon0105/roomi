@@ -90,6 +90,34 @@ const updatePaymentMethod = ({ orderId, paymentMethod, paymentStatus = 'UNPAID',
     include: orderInclude,
   });
 
+const removeOrderItemsFromCart = async ({ userId, orderItems, tx }) => {
+  const cart = await findCartForCheckout(userId, tx);
+
+  if (!cart || cart.items.length === 0) {
+    return;
+  }
+
+  for (const orderItem of orderItems) {
+    if (!orderItem.productId) {
+      continue;
+    }
+
+    const cartItem = cart.items.find((item) => item.productId === orderItem.productId);
+
+    if (!cartItem) {
+      continue;
+    }
+
+    const nextQuantity = cartItem.quantity - orderItem.quantity;
+
+    if (nextQuantity > 0) {
+      await updateCartItemQuantity({ itemId: cartItem.id, quantity: nextQuantity }, tx);
+    } else {
+      await deleteCartItem(cartItem.id, tx);
+    }
+  }
+};
+
 module.exports = {
   clearCart,
   create,
@@ -98,6 +126,7 @@ module.exports = {
   findByCode,
   findByCodeForUser,
   findCartForCheckout,
+  removeOrderItemsFromCart,
   transaction,
   updateCartItemQuantity,
   updatePaymentMethod,

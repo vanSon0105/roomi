@@ -1,3 +1,4 @@
+const compression = require('compression');
 const cors = require('cors');
 const express = require('express');
 const helmet = require('helmet');
@@ -16,6 +17,7 @@ const app = express();
 const frontendPath = path.resolve(__dirname, '..', '..', 'frontend');
 
 app.disable('x-powered-by');
+app.use(compression());
 
 app.use(
   helmet({
@@ -48,7 +50,7 @@ if (config.nodeEnv !== 'test') {
 
 app.use('/api', apiRoutes);
 app.use(pageAccessMiddleware);
-app.use(express.static(frontendPath));
+app.use(express.static(frontendPath, { maxAge: '7d', etag: true }));
 
 app.get('/', (_req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));

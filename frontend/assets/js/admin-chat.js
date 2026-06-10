@@ -132,7 +132,7 @@ async function poll() {
     const el = root?.querySelector('[data-msgs]');
     if (el) { el.innerHTML = messagesHtml(msgs); el.scrollTop = el.scrollHeight; }
   }
-  pollTimer = setTimeout(poll, 4000);
+  pollTimer = setTimeout(poll, 10000);
 }
 
 (async () => {

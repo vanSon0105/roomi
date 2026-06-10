@@ -177,39 +177,7 @@ const extractOrderCodeFromSepay = (payload = {}) => {
   return match ? match[0].toUpperCase() : null;
 };
 
-const removeOrderItemsFromCart = async ({ userId, orderItems, tx }) => {
-  const cart = await ordersRepository.findCartForCheckout(userId, tx);
-
-  if (!cart || cart.items.length === 0) {
-    return;
-  }
-
-  for (const orderItem of orderItems) {
-    if (!orderItem.productId) {
-      continue;
-    }
-
-    const cartItem = cart.items.find((item) => item.productId === orderItem.productId);
-
-    if (!cartItem) {
-      continue;
-    }
-
-    const nextQuantity = cartItem.quantity - orderItem.quantity;
-
-    if (nextQuantity > 0) {
-      await ordersRepository.updateCartItemQuantity(
-        {
-          itemId: cartItem.id,
-          quantity: nextQuantity,
-        },
-        tx,
-      );
-    } else {
-      await ordersRepository.deleteCartItem(cartItem.id, tx);
-    }
-  }
-};
+const removeOrderItemsFromCart = ordersRepository.removeOrderItemsFromCart;
 
 const createPayosPaymentForOrder = async (order) => {
   const client = getPayosClient();

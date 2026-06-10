@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const sharp = require('sharp');
 const AppError = require('../utils/app-error');
 
 const imageDir = path.resolve(__dirname, '..', '..', '..', 'frontend', 'assets', 'images', 'products');
@@ -32,12 +33,36 @@ const upload = multer({
 }).array('images', 6);
 
 const productImageUpload = (req, res, next) => {
-  upload(req, res, (err) => {
+  upload(req, res, async (err) => {
     if (err instanceof multer.MulterError) {
       const msg = err.code === 'LIMIT_FILE_SIZE' ? 'Ảnh tối đa 5MB' : err.code === 'LIMIT_FILE_COUNT' ? 'Tối đa 6 ảnh' : 'Lỗi tải ảnh';
       return next(new AppError(msg, 400));
     }
     if (err) return next(err);
+
+    // Resize uploaded images to max 1200px width, convert to webp
+    if (req.files && req.files.length > 0) {
+      try {
+        await Promise.all(
+          req.files.map(async (file) => {
+            const inputPath = file.path;
+            const webpPath = inputPath.replace(/\.[^.]+$/, '.webp');
+            await sharp(inputPath)
+              .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
+              .webp({ quality: 82 })
+              .toFile(webpPath);
+            // Replace original with webp version
+            fs.unlinkSync(inputPath);
+            fs.renameSync(webpPath, inputPath.replace(/\.[^.]+$/, '.webp'));
+            file.filename = file.filename.replace(/\.[^.]+$/, '.webp');
+            file.path = file.path.replace(/\.[^.]+$/, '.webp');
+          }),
+        );
+      } catch (_err) {
+        // If resize fails, keep original
+      }
+    }
+
     next();
   });
 };

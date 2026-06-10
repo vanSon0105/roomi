@@ -59,6 +59,7 @@ function renderUserRows(users) {
         <span>Đơn hàng</span>
         <span>Vai trò</span>
         <span>Ngày tạo</span>
+        <span></span>
       </div>
       ${users
         .map(
@@ -78,6 +79,7 @@ function renderUserRows(users) {
                 <select data-user-role="${user.id}">${roleOptions(user.role)}</select>
               </div>
               <span>${formatDate(user.createdAt)}</span>
+              <button type="button" data-user-ban="${user.id}" class="admin-ban-btn ${user.isBanned ? 'is-banned' : ''}">${user.isBanned ? 'Mở khoá' : 'Khoá'}</button>
             </article>
           `,
         )
@@ -147,10 +149,16 @@ root?.addEventListener('submit', (event) => {
 
 root?.addEventListener('click', (event) => {
   const pageButton = event.target.closest('[data-users-page]');
-  if (!pageButton) return;
+  if (pageButton) { state.page = Number(pageButton.dataset.usersPage || 1); loadUsers(); return; }
 
-  state.page = Number(pageButton.dataset.usersPage || 1);
-  loadUsers();
+  const banBtn = event.target.closest('[data-user-ban]');
+  if (banBtn) {
+    const id = Number(banBtn.dataset.userBan);
+    const isBanned = banBtn.classList.contains('is-banned');
+    if (!window.confirm(isBanned ? `Mở khoá người dùng #${id}?` : `Khoá người dùng #${id}? Họ sẽ không thể đăng nhập.`)) return;
+    banBtn.disabled = true;
+    patchUser(id, { isBanned: !isBanned }, banBtn);
+  }
 });
 
 root?.addEventListener('change', (event) => {

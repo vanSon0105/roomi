@@ -4297,6 +4297,29 @@ body.checkout-payment-page .payment-actions .btn:disabled {
   color: #e53935;
 }
 
+.admin-ban-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  font-family: var(--copy);
+  cursor: pointer;
+  background: #e53935;
+  color: #fff;
+  transition: background 200ms;
+}
+
+.admin-ban-btn:hover { background: #c62828; }
+
+.admin-ban-btn.is-banned {
+  background: #4caf50;
+}
+
+.admin-ban-btn.is-banned:hover {
+  background: #388e3c;
+}
+
 .admin-table-row > div,
 .admin-table-row > strong,
 .admin-table-row > span {

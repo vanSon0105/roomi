@@ -102,6 +102,7 @@ const updateUserSchema = userIdParamSchema.extend({
   body: z
     .object({
       role: z.enum(roles).optional(),
+      isBanned: z.boolean().optional(),
       name: z.string().trim().min(2).max(100).optional(),
       phone: z.string().trim().min(8).max(20).nullable().optional(),
     })

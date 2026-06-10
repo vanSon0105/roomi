@@ -40,7 +40,6 @@ const paymentMethodLabels = {
 };
 
 const productStatusLabels = {
-  DRAFT: 'Bản nháp',
   ACTIVE: 'Đang bán',
   ARCHIVED: 'Đã ẩn',
 };
@@ -160,7 +159,7 @@ export async function apiFetch(path, options = {}) {
   const payload = await response.json().catch(() => null);
 
   if (!response.ok) {
-    if (response.status === 401) {
+    if (response.status === 401 || response.status === 403) {
       const current = `admin/${window.location.pathname.split('/').pop() || 'dashboard.html'}${window.location.search}`;
       window.location.href = `../login.html?redirect=${encodeURIComponent(current)}`;
     }

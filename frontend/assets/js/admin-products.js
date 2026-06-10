@@ -88,7 +88,7 @@ function productFormHtml(product = null) {
       <label><span>Tồn kho</span><input class="roomi-input" name="stock" type="number" min="0" value="${product?.stock||0}"></label>
       <label><span>Mô tả ngắn</span><textarea class="roomi-input" name="shortDescription" rows="2">${escapeHtml(product?.shortDescription||'')}</textarea></label>
       <label><span>Mô tả</span><textarea class="roomi-input" name="description" rows="4">${escapeHtml(product?.description||'')}</textarea></label>
-      <label><span>Trạng thái</span><select name="status">${productStatusOptions(product?.status||'DRAFT')}</select></label>
+      <label><span>Trạng thái</span><select name="status">${productStatusOptions(product?.status||'ACTIVE')}</select></label>
       <label class="admin-switch"><strong>Nổi bật</strong><input type="checkbox" name="isFeatured" ${product?.isFeatured?'checked':''}><span></span></label>
 
       ${isEdit ? `

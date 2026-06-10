@@ -84,6 +84,10 @@ const login = async ({ identifier, password }) => {
     throw new AppError('Invalid username/email or password', 401);
   }
 
+  if (user.isBanned) {
+    throw new AppError('Tài khoản của bạn đã bị khoá. Vui lòng liên hệ admin.', 403);
+  }
+
   const { password: _password, ...safeUser } = user;
 
   return {

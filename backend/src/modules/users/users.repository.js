@@ -8,6 +8,7 @@ const safeUserSelect = {
   avatarUrl: true,
   birthday: true,
   role: true,
+  isBanned: true,
   createdAt: true,
   updatedAt: true,
 };

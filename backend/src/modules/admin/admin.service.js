@@ -53,6 +53,7 @@ const userSelect = {
   avatarUrl: true,
   birthday: true,
   role: true,
+  isBanned: true,
   createdAt: true,
   updatedAt: true,
   _count: {
@@ -95,6 +96,7 @@ const serializeAdminUser = (user) => ({
   avatarUrl: user.avatarUrl,
   birthday: user.birthday,
   role: user.role,
+  isBanned: user.isBanned,
   orderCount: user._count?.orders || 0,
   createdAt: user.createdAt,
   updatedAt: user.updatedAt,

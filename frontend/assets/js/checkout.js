@@ -452,8 +452,29 @@ function bindCheckoutForm() {
         renderOrderPayment(order);
       }
     } catch (error) {
+      // Show field-level validation errors
+      const fieldErrors = Array.isArray(error.data) ? error.data : [];
+      if (fieldErrors.length > 0) {
+        // Clear all previous field errors
+        form.querySelectorAll('[data-field-error]').forEach(el => el.remove());
+        form.querySelectorAll('.roomi-input--error').forEach(el => el.classList.remove('roomi-input--error'));
+
+        for (const err of fieldErrors) {
+          const fieldName = err.field.replace(/^body\./, '');
+          const input = form.querySelector(`[name="${fieldName}"]`);
+          if (input) {
+            input.classList.add('roomi-input--error');
+            const msg = document.createElement('span');
+            msg.className = 'checkout-field-error';
+            msg.setAttribute('data-field-error', '');
+            msg.textContent = translateValidationError(err);
+            input.parentNode?.appendChild(msg);
+          }
+        }
+      }
+
       if (notice) {
-        notice.textContent = error.message || 'Không tạo được đơn hàng.';
+        notice.textContent = fieldErrors.length > 0 ? 'Vui lòng kiểm tra lại thông tin bên dưới.' : (error.message || 'Không tạo được đơn hàng.');
       }
 
       submitButtons.forEach((button) => {
@@ -465,6 +486,47 @@ function bindCheckoutForm() {
       }
     }
   });
+}
+
+function translateValidationError(err) {
+  const msg = err.message || '';
+  // Generic pattern matching for Zod error messages
+  if (msg.includes('Too small') || msg.includes('at least')) {
+    const num = (msg.match(/(\d+)/) || [])[1] || '';
+    const labels = {
+      'body.name': `Tên phải có ít nhất ${num} ký tự`,
+      'body.phone': `SĐT phải có ít nhất ${num} ký tự`,
+      'body.address': `Địa chỉ phải có ít nhất ${num} ký tự`,
+      'body.email': `Email phải có ít nhất ${num} ký tự`,
+      'body.note': `Ghi chú phải có ít nhất ${num} ký tự`,
+    };
+    if (labels[err.field]) return labels[err.field];
+    return `Phải có ít nhất ${num} ký tự`;
+  }
+  if (msg.includes('Too big') || msg.includes('at most')) {
+    const num = (msg.match(/(\d+)/) || [])[1] || '';
+    const labels = {
+      'body.name': `Tên tối đa ${num} ký tự`,
+      'body.phone': `SĐT tối đa ${num} ký tự`,
+      'body.address': `Địa chỉ tối đa ${num} ký tự`,
+      'body.email': `Email tối đa ${num} ký tự`,
+      'body.note': `Ghi chú tối đa ${num} ký tự`,
+    };
+    if (labels[err.field]) return labels[err.field];
+    return `Tối đa ${num} ký tự`;
+  }
+  if (msg.includes('Invalid') && msg.includes('email')) return 'Email không đúng định dạng';
+  if (msg.includes('Invalid') && msg.includes('enum')) return 'Giá trị không hợp lệ';
+
+  const map = {
+    'body.name': 'Tên không hợp lệ',
+    'body.phone': 'SĐT không hợp lệ',
+    'body.email': 'Email không hợp lệ',
+    'body.address': 'Địa chỉ không hợp lệ',
+    'body.note': 'Ghi chú không hợp lệ',
+    'body.paymentMethod': 'Phương thức thanh toán không hợp lệ',
+  };
+  return map[err.field] || msg;
 }
 
 function renderCheckout(cart) {

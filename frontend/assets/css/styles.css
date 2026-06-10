@@ -1097,6 +1097,19 @@ button {
   color: rgba(80, 0, 0, 0.35);
 }
 
+.roomi-input--error {
+  border-color: #e53935 !important;
+  background: rgba(229,57,53,0.04);
+}
+
+.checkout-field-error {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #e53935;
+}
+
 .auth-form .roomi-input {
   height: clamp(62px, 3.8vw, 78px);
   border-radius: 10px;

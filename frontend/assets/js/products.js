@@ -8,8 +8,10 @@ const pagerRoot = document.querySelector('#productsPager');
 const PRODUCTS_PER_PAGE = 9;
 
 let categories = [{ id: 'all', label: 'Tất cả sản phẩm' }];
-let activeCategory = 'all';
-let currentPage = 1;
+const urlParams = new URLSearchParams(window.location.search);
+let activeCategory = urlParams.get('category') || 'all';
+let activeSearch = urlParams.get('search') || '';
+let currentPage = Number(urlParams.get('page') || 1);
 let pagination = {
   page: 1,
   limit: PRODUCTS_PER_PAGE,
@@ -128,6 +130,9 @@ async function loadProducts() {
   if (activeCategory !== 'all') {
     query.set('category', activeCategory);
   }
+  if (activeSearch) {
+    query.set('search', activeSearch);
+  }
 
   const response = await apiFetch(`/products?${query.toString()}`);
   pagination = response.data.pagination || {
@@ -141,6 +146,12 @@ async function loadProducts() {
 }
 
 async function init() {
+  // Populate search bar with current query
+  if (activeSearch) {
+    const searchInput = document.querySelector('[data-search-form] input');
+    if (searchInput) searchInput.value = activeSearch;
+  }
+
   try {
     const [categoryResponse] = await Promise.all([
       apiFetch('/categories'),

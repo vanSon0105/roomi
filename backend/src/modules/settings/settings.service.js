@@ -11,6 +11,7 @@ const SETTING_KEYS = [
   'sepay_account_no',
   'sepay_account_name',
   'sepay_qr_bank_name',
+  'shipping_fee_enabled',
 ];
 
 const getTransferProvider = async () => {
@@ -39,6 +40,7 @@ const getAllSettings = async () => {
     sepay_account_no: map.sepay_account_no || '',
     sepay_account_name: map.sepay_account_name || '',
     sepay_qr_bank_name: map.sepay_qr_bank_name || 'VietinBank',
+    shipping_fee_enabled: map.shipping_fee_enabled !== 'false',
   };
 };
 

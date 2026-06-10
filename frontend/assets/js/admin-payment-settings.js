@@ -81,6 +81,16 @@ function renderSettings(data) {
         </label>
       </section>
 
+      <section class="admin-panel">
+        <h2>Phí vận chuyển</h2>
+        <label class="admin-switch">
+          <strong>Áp dụng phí ship (30.000₫)</strong>
+          <input type="checkbox" name="shipping_fee_enabled" value="true" ${data.shipping_fee_enabled !== false ? 'checked' : ''}>
+          <span></span>
+        </label>
+        <small style="color:#999;font-size:13px">Khi tắt, đơn hàng sẽ không tính phí vận chuyển.</small>
+      </section>
+
       <button class="btn btn-maroon" type="submit">Lưu tất cả</button>
       <span class="admin-settings-feedback" data-settings-feedback></span>
     </form>
@@ -122,6 +132,7 @@ root?.addEventListener('submit', async (event) => {
       sepay_account_no: formData.get('sepay_account_no')?.toString() || '',
       sepay_account_name: formData.get('sepay_account_name')?.toString() || '',
       sepay_qr_bank_name: formData.get('sepay_qr_bank_name')?.toString() || '',
+      shipping_fee_enabled: formData.get('shipping_fee_enabled') === 'true' ? 'true' : 'false',
     };
 
     const response = await apiFetch('/admin/settings', {

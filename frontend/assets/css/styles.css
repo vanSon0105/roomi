@@ -4087,6 +4087,57 @@ body.checkout-payment-page .payment-actions .btn:disabled {
   padding: 20px;
 }
 
+.admin-settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.admin-settings-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-settings-form label > span:first-child {
+  font-weight: 900;
+  font-size: 13px;
+  color: var(--maroon);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.admin-settings-form input,
+.admin-settings-form select {
+  width: 100%;
+  max-width: 420px;
+  padding: 10px 14px;
+  border: 1px solid rgba(80,0,0,0.18);
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: var(--copy);
+  font-weight: 400;
+  background: #fff;
+  color: var(--maroon);
+  transition: border-color 200ms;
+}
+
+.admin-settings-form input:focus,
+.admin-settings-form select:focus {
+  border-color: var(--maroon);
+  outline: none;
+}
+
+.admin-settings-form small {
+  font-size: 12px;
+  color: #999;
+  margin-top: 2px;
+}
+
+.admin-settings-form small a {
+  color: var(--maroon);
+}
+
 .admin-stat span,
 .admin-panel-head span,
 .admin-drawer-grid span,
@@ -4231,12 +4282,31 @@ body.checkout-payment-page .payment-actions .btn:disabled {
   min-height: 42px;
   width: 100%;
   border: 1px solid rgba(80, 0, 0, 0.15);
-  border-radius: 8px;
+  border-radius: 10px;
   outline: 0;
-  background: rgba(255, 255, 255, 0.65);
+  background: #fff;
   color: var(--maroon);
   padding: 0 12px;
+  font-size: 14px;
   font-weight: 700;
+  font-family: var(--copy);
+  cursor: pointer;
+  transition: border-color 200ms;
+}
+
+.admin-filters input:focus,
+.admin-filters select:focus,
+.admin-table select:focus,
+.admin-inline-field input:focus {
+  border-color: var(--maroon);
+}
+
+.admin-filters input {
+  cursor: text;
+}
+
+.admin-table select {
+  max-width: 180px;
 }
 
 .admin-table {
@@ -4409,8 +4479,10 @@ body.checkout-payment-page .payment-actions .btn:disabled {
 }
 
 .admin-switch span {
+  position: relative;
   width: 46px;
   height: 26px;
+  flex: none;
   border-radius: 999px;
   background: rgba(80, 0, 0, 0.16);
   transition: background 420ms var(--fluid);
@@ -4419,10 +4491,10 @@ body.checkout-payment-page .payment-actions .btn:disabled {
 .admin-switch span::after {
   content: "";
   position: absolute;
-  top: 4px;
-  left: 4px;
-  width: 18px;
-  height: 18px;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
   border-radius: 999px;
   background: #fff;
   box-shadow: 0 4px 12px rgba(80, 0, 0, 0.18);
@@ -4434,7 +4506,7 @@ body.checkout-payment-page .payment-actions .btn:disabled {
 }
 
 .admin-switch input:checked + span::after {
-  transform: translateX(22px);
+  transform: translateX(20px);
 }
 
 .admin-pagination {
@@ -4646,6 +4718,19 @@ body.checkout-payment-page .payment-actions .btn:disabled {
 
 .admin-drawer-form .admin-switch input:checked + span::after {
   transform: translateX(20px);
+}
+
+.admin-settings-form .admin-switch {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+}
+
+.admin-settings-form .admin-switch strong {
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--maroon);
 }
 
 .admin-drawer-actions {

@@ -18,6 +18,7 @@ const config = {
   corsOrigin: process.env.CORS_ORIGIN || '*',
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS || 10),
   checkoutShippingFee: Number(process.env.CHECKOUT_SHIPPING_FEE || 30000),
+  shippingFeeEnabled: process.env.SHIPPING_FEE_ENABLED !== 'false',
   appBaseUrl: (process.env.APP_BASE_URL || `http://localhost:${process.env.PORT || 4000}`).replace(/\/+$/, ''),
   vietqr: {
     bankId: process.env.VIETQR_BANK_ID || '',
@@ -76,6 +77,7 @@ const syncFromDb = async () => {
     if (map.sepay_account_no) config.sepay.accountNo = map.sepay_account_no;
     if (map.sepay_account_name) config.sepay.accountName = map.sepay_account_name;
     if (map.sepay_qr_bank_name) config.sepay.qrBankName = map.sepay_qr_bank_name;
+    if (map.shipping_fee_enabled !== undefined) config.shippingFeeEnabled = map.shipping_fee_enabled !== 'false';
   } catch (_error) {
     // DB not ready yet (first migration) — ignore
   }

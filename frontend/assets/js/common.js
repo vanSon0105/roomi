@@ -127,8 +127,8 @@ export function renderShell(page = '') {
           <a class="brand-link" href="${homeHref}" aria-label="ROOMI trang chủ">
             <img src="${rootPrefix}assets/images/figma/logo-roomi-navbar.png" alt="ROOMI">
           </a>
-          <form class="search-pill" role="search">
-            <input aria-label="Tìm kiếm sản phẩm" type="search">
+          <form class="search-pill" role="search" data-search-form>
+            <input name="q" aria-label="Tìm kiếm sản phẩm" type="search" placeholder="Tìm sản phẩm...">
             <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
           </form>
           <nav class="desktop-nav" aria-label="Điều hướng chính">
@@ -366,6 +366,15 @@ function bindCommonInteractions() {
   document.querySelector('[data-menu-close]')?.addEventListener('click', () => {
     drawer?.classList.remove('is-open');
     drawer?.setAttribute('aria-hidden', 'true');
+  });
+
+  // Search form → redirect to products with query, or clear search
+  document.querySelector('[data-search-form]')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const q = new FormData(e.target).get('q')?.toString().trim();
+    window.location.href = q
+      ? pageHref(`products.html?search=${encodeURIComponent(q)}`)
+      : pageHref('products.html');
   });
 
   // Chat toggle handled in initChatPolling

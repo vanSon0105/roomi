@@ -9,6 +9,7 @@ const updateSettingsSchema = z.object({
     sepay_account_no: z.string().optional(),
     sepay_account_name: z.string().optional(),
     sepay_qr_bank_name: z.string().optional(),
+    shipping_fee_enabled: z.enum(['true', 'false']).optional(),
   }),
 });
 

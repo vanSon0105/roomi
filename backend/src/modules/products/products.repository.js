@@ -32,11 +32,7 @@ const buildWhere = ({ category, search, featured } = {}) => {
   }
 
   if (search) {
-    where.OR = [
-      { name: { contains: search } },
-      { shortDescription: { contains: search } },
-      { description: { contains: search } },
-    ];
+    where.name = { contains: search };
   }
 
   if (featured === true) {

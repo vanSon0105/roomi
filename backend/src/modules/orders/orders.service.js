@@ -68,7 +68,7 @@ const createOrder = async (userId, payload) => {
       (sum, item) => sum + toNumber(item.product.price) * item.quantity,
       0,
     );
-    const shippingFee = config.checkoutShippingFee;
+    const shippingFee = config.shippingFeeEnabled ? config.checkoutShippingFee : 0;
     const discountAmount = 0;
     const total = subtotal + shippingFee - discountAmount;
     const paymentMethod = payload.paymentMethod || 'BANK_TRANSFER';

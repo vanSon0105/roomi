@@ -6,25 +6,63 @@
     <title>3D Room - ROOMI</title>
     <meta name="description" content="Khu vực mô phỏng 3D ROOMI.">
     <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="../assets/css/styles.css?v=room3d-full-viewport-2">
+    <style>
+      body[data-page="room-3d"] .room3d-experience {
+        min-height: 100dvh;
+        display: block;
+        overflow: hidden;
+      }
+
+      body[data-page="room-3d"] .room3d-stage {
+        width: 100%;
+        min-height: 100dvh;
+        grid-column: 1 / -1;
+      }
+    </style>
   </head>
   <body data-page="room-3d">
     <div data-header></div>
 
-    <main>
-      <section class="locked-state container reveal">
-        <div>
-          <p class="section-kicker">3D ROOM</p>
-          <h1>Khu vực mô phỏng 3D</h1>
-          <p>Mô phỏng đang để trống theo yêu cầu. Bố cục đã sẵn sàng để gắn model hoặc canvas tương tác sau.</p>
-          <div class="empty-3d"></div>
+    <main class="room3d-main">
+      <section class="room3d-experience" aria-label="Mô phỏng không gian 3D ROOMI">
+        <div class="room3d-stage" data-room3d-stage>
+          <canvas class="room3d-canvas" data-room3d-canvas aria-label="Mô phỏng không gian ROOMI"></canvas>
+
+          <div class="room3d-loading" data-room3d-loading>
+            <span></span>
+            <strong>Đang tải mô phỏng 3D</strong>
+          </div>
+
+          <div class="room3d-toolbar" aria-label="Điều khiển mô phỏng">
+            <div class="room3d-scene-tabs" role="tablist" aria-label="Chọn không gian">
+              <button class="is-active" type="button" data-room-scene="living" role="tab" aria-selected="true">Phòng khách</button>
+              <button type="button" data-room-scene="bedroom" role="tab" aria-selected="false">Phòng ngủ</button>
+            </div>
+
+            <div class="room3d-controls" aria-label="Điều khiển camera">
+              <button class="is-active" type="button" data-room-control="spin" aria-label="Tự xoay" title="Tự xoay">
+                <i class="ph ph-arrows-clockwise" aria-hidden="true"></i>
+              </button>
+              <button type="button" data-room-control="zoom-in" aria-label="Phóng to" title="Phóng to">
+                <i class="ph ph-magnifying-glass-plus" aria-hidden="true"></i>
+              </button>
+              <button type="button" data-room-control="zoom-out" aria-label="Thu nhỏ" title="Thu nhỏ">
+                <i class="ph ph-magnifying-glass-minus" aria-hidden="true"></i>
+              </button>
+              <button type="button" data-room-control="reset" aria-label="Đặt lại góc nhìn" title="Đặt lại góc nhìn">
+                <i class="ph ph-clock-counter-clockwise" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+
+          <p class="room3d-status" data-room3d-status>Phòng khách</p>
         </div>
       </section>
     </main>
 
-    <div data-footer></div>
     <div data-chat></div>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script type="module" src="../assets/js/page.js?v=pages-path-1"></script>
+    <script type="module" src="../assets/js/room-3d.js?v=room3d-2"></script>
   </body>
 </html>

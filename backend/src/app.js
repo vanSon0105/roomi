@@ -24,9 +24,15 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        'script-src': ["'self'", 'https://unpkg.com'],
-        'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://unpkg.com'],
-        'font-src': ["'self'", 'https://fonts.gstatic.com', 'https://unpkg.com', 'data:'],
+        'script-src': ["'self'", 'https://unpkg.com', 'https://esm.sh'],
+        'style-src': [
+          "'self'",
+          "'unsafe-inline'",
+          'https://fonts.googleapis.com',
+          'https://unpkg.com',
+          'https://cdn.jsdelivr.net',
+        ],
+        'font-src': ["'self'", 'https://fonts.gstatic.com', 'https://unpkg.com', 'https://cdn.jsdelivr.net', 'data:'],
         'img-src': ["'self'", 'data:', 'blob:', 'https://img.vietqr.io', 'https://qr.sepay.vn'],
       },
     },
@@ -50,7 +56,17 @@ if (config.nodeEnv !== 'test') {
 
 app.use('/api', apiRoutes);
 app.use(pageAccessMiddleware);
-app.use(express.static(frontendPath, { maxAge: '7d', etag: true }));
+app.use(
+  express.static(frontendPath, {
+    maxAge: '7d',
+    etag: true,
+    setHeaders: (res, filePath) => {
+      if (path.extname(filePath).toLowerCase() === '.html') {
+        res.setHeader('Cache-Control', 'no-cache');
+      }
+    },
+  }),
+);
 
 app.get('/', (_req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));

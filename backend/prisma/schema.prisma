@@ -30,6 +30,7 @@ enum PaymentStatus {
   UNPAID
   PAID
   REFUNDED
+  CANCELLED
 }
 
 enum PaymentMethod {
@@ -38,6 +39,11 @@ enum PaymentMethod {
   ONLINE
   PAYOS
   SEPAY
+}
+
+enum OrderType {
+  PRODUCT
+  ROOM3D_ACCESS
 }
 
 enum PaymentProvider {
@@ -68,6 +74,7 @@ model User {
   cart         Cart?
   addresses    Address[]
   orders       Order[]
+  room3dAccess Room3DAccess?
   chatMessages ChatMessage[]
   createdAt    DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -184,6 +191,7 @@ model Address {
 model Order {
   id                  Int                  @id @default(autoincrement())
   code                String               @unique
+  orderType           OrderType            @default(PRODUCT)
   userId              Int
   shippingAddressId   Int?
   recipientName       String
@@ -207,10 +215,12 @@ model Order {
   shippingAddress     Address?             @relation("OrderShippingAddress", fields: [shippingAddressId], references: [id], onDelete: SetNull)
   items               OrderItem[]
   paymentTransactions PaymentTransaction[]
+  room3dAccess        Room3DAccess?
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 
   @@index([userId, status])
+  @@index([orderType])
   @@index([shippingAddressId])
   @@map("orders")
 }
@@ -262,6 +272,20 @@ model Setting {
   value String @db.Text
 
   @@map("settings")
+}
+
+model Room3DAccess {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @unique
+  orderId   Int?      @unique
+  pricePaid Decimal   @default(0) @db.Decimal(12, 2)
+  grantedAt DateTime  @default(now())
+  expiresAt DateTime?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order     Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([expiresAt])
+  @@map("room3d_accesses")
 }
 
 model ChatMessage {

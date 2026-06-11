@@ -8,7 +8,7 @@ import {
   renderPagination,
   roleOptions,
   statusBadge,
-} from './admin-common.js';
+} from './admin-common.js?v=admin-room3d-1';
 
 renderAdminShell('users');
 

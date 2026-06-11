@@ -5,6 +5,7 @@ const config = require('../../config/env');
 const AppError = require('../../utils/app-error');
 const ordersRepository = require('../orders/orders.repository');
 const paymentsRepository = require('./payments.repository');
+const room3dRepository = require('../room3d/room3d.repository');
 
 const toNumber = (value) => (value == null ? 0 : Number(value));
 const toMoney = (value) => Number(value).toFixed(2);
@@ -46,9 +47,15 @@ const appendQuery = (url, params) => {
   return result.toString();
 };
 
-const payosUrls = (orderCode = '') => {
-  const baseReturnUrl = config.payos.returnUrl || `${config.appBaseUrl}/pages/checkout-success.html`;
-  const baseCancelUrl = config.payos.cancelUrl || `${config.appBaseUrl}/pages/checkout.html`;
+const payosUrls = (order = '') => {
+  const orderCode = typeof order === 'string' ? order : order?.code || '';
+  const isRoom3DAccess = typeof order === 'object' && order?.orderType === 'ROOM3D_ACCESS';
+  const baseReturnUrl = isRoom3DAccess
+    ? `${config.appBaseUrl}/pages/room-3d.html`
+    : config.payos.returnUrl || `${config.appBaseUrl}/pages/checkout-success.html`;
+  const baseCancelUrl = isRoom3DAccess
+    ? `${config.appBaseUrl}/pages/room-3d.html`
+    : config.payos.cancelUrl || `${config.appBaseUrl}/pages/checkout.html`;
 
   return {
     webhookUrl: config.payos.webhookUrl || `${config.appBaseUrl}/api/payments/payos/webhook`,
@@ -183,7 +190,7 @@ const createPayosPaymentForOrder = async (order) => {
   const client = getPayosClient();
   const providerOrderCode = generateProviderOrderCode(order.id);
   const amount = Math.round(toNumber(order.total));
-  const urls = payosUrls(order.code);
+  const urls = payosUrls(order);
   const requestPayload = {
     orderCode: Number(providerOrderCode),
     amount,
@@ -300,6 +307,8 @@ const markPayosPaid = async ({ providerOrderCode, webhookData, webhookPayload })
       tx,
     });
 
+    await room3dRepository.grantAccessForOrder(transaction.order, tx);
+
     return transaction;
   });
 
@@ -384,6 +393,8 @@ const handleSepayWebhook = async ({ payload, headers }) => {
         orderItems: order.items,
         tx,
       });
+
+      await room3dRepository.grantAccessForOrder(order, tx);
     }
 
     return savedTransaction;

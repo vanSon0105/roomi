@@ -4,7 +4,7 @@ import {
   formatDate,
   mediaUrl,
   renderAdminShell,
-} from './admin-common.js?v=admin-chat-2';
+} from './admin-common.js?v=admin-room3d-1';
 
 renderAdminShell('chat');
 

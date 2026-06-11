@@ -49,7 +49,8 @@ const updateSettings = async (payload) => {
 
   for (const key of SETTING_KEYS) {
     if (Object.prototype.hasOwnProperty.call(payload, key) && payload[key] !== undefined) {
-      updates.push(settingsRepository.upsert(key, payload[key]));
+      const value = typeof payload[key] === 'string' ? payload[key].trim() : payload[key];
+      updates.push(settingsRepository.upsert(key, value));
     }
   }
 

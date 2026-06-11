@@ -2,6 +2,7 @@ const express = require('express');
 
 const adminController = require('./admin.controller');
 const chatController = require('../chat/chat.controller');
+const room3dController = require('../room3d/room3d.controller');
 const settingsController = require('../settings/settings.controller');
 const adminMiddleware = require('../../middlewares/admin.middleware');
 const authMiddleware = require('../../middlewares/auth.middleware');
@@ -20,6 +21,7 @@ const {
 } = require('./admin.validation');
 const { updateSettingsSchema } = require('../settings/settings.validation');
 const { adminReplySchema } = require('../chat/chat.validation');
+const { updateRoom3DSettingsSchema } = require('../room3d/room3d.validation');
 
 const router = express.Router();
 
@@ -28,6 +30,8 @@ router.use(authMiddleware, adminMiddleware);
 router.get('/stats', adminController.getStats);
 router.get('/settings', settingsController.getAdminSettings);
 router.put('/settings', validate(updateSettingsSchema), settingsController.updateAdminSettings);
+router.get('/room3d', room3dController.getAdminRoom3D);
+router.put('/room3d', validate(updateRoom3DSettingsSchema), room3dController.updateAdminRoom3D);
 router.get('/orders', validate(listOrdersSchema), adminController.getOrders);
 router.get('/orders/:code', validate(orderCodeParamSchema), adminController.getOrderByCode);
 router.patch('/orders/:code', validate(updateOrderSchema), adminController.updateOrder);

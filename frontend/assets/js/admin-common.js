@@ -8,6 +8,7 @@ const adminNav = [
   { id: 'products', label: 'Sản phẩm', href: 'products.html', icon: 'ph-package' },
   { id: 'users', label: 'Người dùng', href: 'users.html', icon: 'ph-users-three' },
   { id: 'payment-settings', label: 'Thanh toán', href: 'payment-settings.html', icon: 'ph-credit-card' },
+  { id: 'room-3d', label: 'Mô phỏng 3D', href: 'room-3d.html', icon: 'ph-cube-focus' },
   { id: 'chat', label: 'Chat', href: 'chat.html', icon: 'ph-chats-circle' },
 ];
 
@@ -24,6 +25,7 @@ const paymentStatusLabels = {
   UNPAID: 'Chưa thanh toán',
   PAID: 'Đã thanh toán',
   REFUNDED: 'Hoàn tiền',
+  CANCELLED: 'Hủy thanh toán',
 };
 
 const paymentDisplayLabels = {

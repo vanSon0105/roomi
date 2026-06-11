@@ -9,7 +9,7 @@ import {
   renderAdminShell,
   renderPagination,
   statusBadge,
-} from './admin-common.js?v=admin-product-crud-2';
+} from './admin-common.js?v=admin-room3d-1';
 
 renderAdminShell('products');
 

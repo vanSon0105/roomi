@@ -3101,6 +3101,129 @@ body.checkout-payment-page .payment-actions .btn:disabled {
   font-weight: 700;
 }
 
+.room3d-paywall {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: clamp(28px, 5vw, 72px) 20px;
+  background:
+    linear-gradient(120deg, rgba(80, 0, 0, 0.92), rgba(80, 0, 0, 0.72) 42%, rgba(240, 240, 232, 0.86)),
+    var(--cream);
+}
+
+.room3d-paywall-card {
+  width: min(100%, 980px);
+  padding: clamp(26px, 4vw, 56px);
+  border: 1px solid rgba(255, 248, 248, 0.36);
+  border-radius: 18px;
+  background: rgba(255, 248, 248, 0.9);
+  box-shadow: 0 28px 68px rgba(24, 0, 0, 0.24);
+}
+
+.room3d-paywall-card .section-kicker {
+  color: rgba(80, 0, 0, 0.66);
+  letter-spacing: 0.28em;
+}
+
+.room3d-paywall-card h1 {
+  max-width: 820px;
+  margin: 8px 0 12px;
+  font-family: var(--display);
+  font-size: clamp(4rem, 8vw, 8.2rem);
+  font-weight: 400;
+  line-height: 0.92;
+}
+
+.room3d-paywall-card p {
+  max-width: 620px;
+  margin: 0 0 22px;
+  font-size: clamp(1.1rem, 1.5vw, 1.45rem);
+  line-height: 1.35;
+}
+
+.room3d-price {
+  display: block;
+  margin: 0 0 24px;
+  font-size: clamp(2rem, 3vw, 3.1rem);
+  line-height: 1;
+}
+
+.room3d-payment {
+  display: grid;
+  grid-template-columns: minmax(240px, 330px) minmax(0, 1fr);
+  gap: clamp(18px, 3vw, 34px);
+  align-items: start;
+}
+
+.room3d-qr,
+.room3d-qr-missing {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 16px 34px rgba(80, 0, 0, 0.12);
+}
+
+.room3d-qr-missing {
+  min-height: 310px;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+  color: var(--maroon);
+  font-weight: 800;
+}
+
+.room3d-payos-card {
+  align-content: center;
+  gap: 14px;
+}
+
+.room3d-payos-card p {
+  max-width: 250px;
+  margin: 0 auto;
+  color: rgba(65, 4, 2, 0.72);
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.room3d-payment-link {
+  grid-column: 1 / -1;
+  width: fit-content;
+}
+
+.room3d-payment-info {
+  display: grid;
+  grid-template-columns: minmax(140px, 0.4fr) minmax(0, 1fr);
+  gap: 12px 18px;
+  padding: clamp(18px, 3vw, 30px);
+  border-radius: 16px;
+  background: rgba(80, 0, 0, 0.06);
+}
+
+.room3d-payment-info span {
+  color: rgba(65, 4, 2, 0.64);
+  font-weight: 800;
+}
+
+.room3d-payment-info strong {
+  overflow-wrap: anywhere;
+}
+
+.room3d-payment-info p {
+  grid-column: 1 / -1;
+  margin: 10px 0 0;
+  color: rgba(65, 4, 2, 0.74);
+  font-size: 1rem;
+}
+
+.room3d-paywall-note {
+  min-height: 26px;
+  margin-top: 14px;
+  color: #9b2f25;
+  font-weight: 700;
+}
+
 @keyframes room3d-spin {
   to {
     transform: rotate(1turn);
@@ -3173,6 +3296,14 @@ body.checkout-payment-page .payment-actions .btn:disabled {
     left: 16px;
     bottom: 16px;
     max-width: calc(100% - 104px);
+  }
+
+  .room3d-payment {
+    grid-template-columns: 1fr;
+  }
+
+  .room3d-payment-info {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -4616,6 +4747,11 @@ body.checkout-payment-page .payment-actions .btn:disabled {
 .admin-users-table .admin-table-head,
 .admin-users-table .admin-table-row {
   grid-template-columns: 1fr 1.2fr 0.5fr 0.8fr 0.8fr;
+}
+
+.admin-room3d-table .admin-table-head,
+.admin-room3d-table .admin-table-row {
+  grid-template-columns: 1.4fr 1fr 0.7fr 0.9fr;
 }
 
 .admin-table-head {

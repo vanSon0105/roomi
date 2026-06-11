@@ -1,6 +1,7 @@
 const prisma = require('../../config/prisma');
 const AppError = require('../../utils/app-error');
 const { serializeOrder } = require('../orders/orders.presenter');
+const room3dRepository = require('../room3d/room3d.repository');
 const { serializeProduct } = require('../products/products.presenter');
 
 const toNumber = (value) => (value == null ? 0 : Number(value));
@@ -340,6 +341,10 @@ const updateOrder = async (code, payload) => {
     data,
     include: orderInclude,
   });
+
+  if (payload.paymentStatus === 'PAID') {
+    await room3dRepository.grantAccessForOrder(order);
+  }
 
   return serializeAdminOrder(order);
 };

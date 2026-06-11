@@ -7,6 +7,7 @@ const root = document.querySelector('#checkoutRoot');
 const mode = document.body.dataset.checkout || 'form';
 const previewShipping = 30000;
 const SELECTED_CART_STORAGE_KEY = 'roomi_selected_cart_items';
+const PAYMENT_POLL_LIMIT_MS = 2 * 60 * 1000;
 let paymentPollTimer = null;
 
 function clearPaymentPoll() {
@@ -15,6 +16,13 @@ function clearPaymentPoll() {
     paymentPollTimer = null;
   }
 }
+
+window.addEventListener('pagehide', clearPaymentPoll);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearPaymentPoll();
+  }
+});
 
 function readSelectedCartItemIds() {
   const raw = sessionStorage.getItem(SELECTED_CART_STORAGE_KEY);
@@ -247,13 +255,13 @@ function renderPaidSuccess(order) {
   observeReveal();
 }
 
-function pollPaymentOrder(code, attempt = 0) {
+function pollPaymentOrder(code, startedAt = Date.now()) {
   clearPaymentPoll();
 
-  if (!code || attempt >= 40) {
+  if (!code || Date.now() - startedAt >= PAYMENT_POLL_LIMIT_MS) {
     const note = root?.querySelector('[data-payment-poll-note]');
     if (note) {
-      note.textContent = 'Hệ thống chưa nhận được webhook xác nhận. Bạn có thể tải lại trang sau ít phút.';
+      note.textContent = 'Đã dừng tự động kiểm tra sau 2 phút. Bạn có thể tải lại trang nếu đã thanh toán.';
     }
     return;
   }
@@ -268,11 +276,11 @@ function pollPaymentOrder(code, attempt = 0) {
         return;
       }
 
-      pollPaymentOrder(code, attempt + 1);
+      pollPaymentOrder(code, startedAt);
     } catch (_error) {
-      pollPaymentOrder(code, attempt + 1);
+      pollPaymentOrder(code, startedAt);
     }
-  }, 2500);
+  }, Math.min(2500, PAYMENT_POLL_LIMIT_MS - (Date.now() - startedAt)));
 }
 
 function renderAutoPaymentPending(order) {

@@ -70,13 +70,14 @@ const syncFromDb = async () => {
     for (const s of settings) {
       if (s.value) map[s.key] = s.value;
     }
+    const clean = (key) => (typeof map[key] === 'string' ? map[key].trim() : map[key]);
 
-    if (map.payos_client_id) config.payos.clientId = map.payos_client_id;
-    if (map.payos_api_key) config.payos.apiKey = map.payos_api_key;
-    if (map.payos_checksum_key) config.payos.checksumKey = map.payos_checksum_key;
-    if (map.sepay_account_no) config.sepay.accountNo = map.sepay_account_no;
-    if (map.sepay_account_name) config.sepay.accountName = map.sepay_account_name;
-    if (map.sepay_qr_bank_name) config.sepay.qrBankName = map.sepay_qr_bank_name;
+    if (clean('payos_client_id')) config.payos.clientId = clean('payos_client_id');
+    if (clean('payos_api_key')) config.payos.apiKey = clean('payos_api_key');
+    if (clean('payos_checksum_key')) config.payos.checksumKey = clean('payos_checksum_key');
+    if (clean('sepay_account_no')) config.sepay.accountNo = clean('sepay_account_no');
+    if (clean('sepay_account_name')) config.sepay.accountName = clean('sepay_account_name');
+    if (clean('sepay_qr_bank_name')) config.sepay.qrBankName = clean('sepay_qr_bank_name');
     if (map.shipping_fee_enabled !== undefined) config.shippingFeeEnabled = map.shipping_fee_enabled !== 'false';
   } catch (_error) {
     // DB not ready yet (first migration) — ignore

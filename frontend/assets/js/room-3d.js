@@ -1,7 +1,8 @@
 import * as THREE from 'https://esm.sh/three@0.160.0';
 import { OrbitControls } from 'https://esm.sh/three@0.160.0/examples/jsm/controls/OrbitControls.js';
 import { FBXLoader } from 'https://esm.sh/three@0.160.0/examples/jsm/loaders/FBXLoader.js';
-import { observeReveal, renderShell } from './common.js?v=pages-path-1';
+import { apiFetch, escapeHtml, observeReveal, pageHref, renderShell } from './common.js?v=pages-path-1';
+import { formatCurrency } from './data.js';
 
 const ROOM_SCENES = {
   living: {
@@ -21,10 +22,337 @@ const ROOM_SCENES = {
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const transparentTexture =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=';
+const PAYMENT_POLL_LIMIT_MS = 2 * 60 * 1000;
+let paymentPollTimer = null;
 
 renderShell(document.body.dataset.page || '');
 observeReveal();
-initRoomPreview();
+bootstrapRoomPreview();
+
+const viewerMarkup = () => `
+  <section class="room3d-experience" aria-label="Mô phỏng không gian 3D ROOMI">
+    <div class="room3d-stage" data-room3d-stage>
+      <canvas class="room3d-canvas" data-room3d-canvas aria-label="Mô phỏng không gian ROOMI"></canvas>
+
+      <div class="room3d-loading" data-room3d-loading>
+        <span></span>
+        <strong>Đang tải mô phỏng 3D</strong>
+      </div>
+
+      <div class="room3d-toolbar" aria-label="Điều khiển mô phỏng">
+        <div class="room3d-scene-tabs" role="tablist" aria-label="Chọn không gian">
+          <button class="is-active" type="button" data-room-scene="living" role="tab" aria-selected="true">Phòng khách</button>
+          <button type="button" data-room-scene="bedroom" role="tab" aria-selected="false">Phòng ngủ</button>
+        </div>
+
+        <div class="room3d-controls" aria-label="Điều khiển camera">
+          <button class="is-active" type="button" data-room-control="spin" aria-label="Tự xoay" title="Tự xoay">
+            <i class="ph ph-arrows-clockwise" aria-hidden="true"></i>
+          </button>
+          <button type="button" data-room-control="zoom-in" aria-label="Phóng to" title="Phóng to">
+            <i class="ph ph-magnifying-glass-plus" aria-hidden="true"></i>
+          </button>
+          <button type="button" data-room-control="zoom-out" aria-label="Thu nhỏ" title="Thu nhỏ">
+            <i class="ph ph-magnifying-glass-minus" aria-hidden="true"></i>
+          </button>
+          <button type="button" data-room-control="reset" aria-label="Đặt lại góc nhìn" title="Đặt lại góc nhìn">
+            <i class="ph ph-clock-counter-clockwise" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+
+      <p class="room3d-status" data-room3d-status>Phòng khách</p>
+    </div>
+  </section>
+`;
+
+async function bootstrapRoomPreview() {
+  // If returning from PayOS with cancellation, cancel the order server-side
+  if (hasCancelledPayos()) {
+    try { await apiFetch('/room3d/cancel', { method: 'POST', body: JSON.stringify({}) }); } catch (_) {}
+  }
+
+  const loadingText = document.querySelector('[data-room3d-loading] strong');
+  if (loadingText) {
+    loadingText.textContent = 'Đang kiểm tra quyền xem 3D';
+  }
+
+  try {
+    const response = await apiFetch('/room3d/access');
+    const access = response.data;
+
+    if (access?.hasAccess) {
+      initRoomPreview();
+      return;
+    }
+
+    renderPaywall(access);
+  } catch (error) {
+    renderPaywallError(error);
+  }
+}
+
+function renderPaywallError(error) {
+  const main = document.querySelector('.room3d-main');
+  if (!main) return;
+
+  main.innerHTML = `
+    <section class="room3d-paywall">
+      <div class="room3d-paywall-card">
+        <p class="section-kicker">ROOMI 3D</p>
+        <h1>Không tải được quyền xem</h1>
+        <p>${escapeHtml(error.message || 'Vui lòng thử lại sau.')}</p>
+        <a class="btn btn-outline" href="${pageHref('products.html')}">Quay lại mua sắm</a>
+      </div>
+    </section>
+  `;
+}
+
+function isPayosOrder(order) {
+  return order?.payment?.provider === 'PAYOS' || order?.paymentMethod === 'PAYOS';
+}
+
+function hasReturnedFromPayos() {
+  const query = new URLSearchParams(window.location.search);
+  return query.get('provider') === 'payos' || query.has('payment');
+}
+
+function hasCancelledPayos() {
+  const query = new URLSearchParams(window.location.search);
+  return query.get('provider') === 'payos' && query.get('payment') === 'cancelled';
+}
+
+function renderPayosPending(order, { autoRedirect = false } = {}) {
+  clearPaymentPoll();
+  const main = document.querySelector('.room3d-main');
+  if (!main) return;
+
+  const checkoutUrl = order?.payment?.checkoutUrl || '';
+
+  // If just returned from PayOS with cancellation
+  if (hasCancelledPayos()) {
+    main.innerHTML = `
+      <section class="room3d-paywall">
+        <div class="room3d-paywall-card">
+          <p class="section-kicker">ROOMI 3D</p>
+          <h1>Thanh toán đã hủy</h1>
+          <p>Bạn đã hủy thanh toán. Nhấn nút bên dưới để tạo đơn mới.</p>
+          <button class="btn btn-maroon" type="button" data-room3d-buy>Mở khóa ngay</button>
+        </div>
+      </section>
+    `;
+    return;
+  }
+
+  main.innerHTML = `
+    <section class="room3d-paywall">
+      <div class="room3d-paywall-card">
+        <p class="section-kicker">ROOMI 3D</p>
+        <h1>${autoRedirect ? 'Đang chuyển sang trang thanh toán' : 'Đang kiểm tra thanh toán'}</h1>
+        <p>${autoRedirect ? 'ROOMI đang mở trang thanh toán cho bạn.' : 'Nếu bạn chưa hoàn tất thanh toán, có thể tiếp tục.'}</p>
+        <strong class="room3d-price">${formatCurrency(order?.total || order?.payment?.amount || 0)}</strong>
+        ${checkoutUrl && !autoRedirect ? `<a class="btn btn-maroon" href="${escapeHtml(checkoutUrl)}">Tiếp tục thanh toán</a>` : ''}
+        <p class="room3d-paywall-note" data-room3d-payment-status>Trang sẽ tự mở khóa sau khi Roomi xác nhận thanh toán.</p>
+      </div>
+    </section>
+  `;
+
+  pollRoom3DOrder(order.code);
+
+  if (autoRedirect && checkoutUrl) {
+    window.location.href = checkoutUrl;
+  }
+}
+
+function renderPaywall(access = {}) {
+  clearPaymentPoll();
+  const main = document.querySelector('.room3d-main');
+  if (!main) return;
+
+  const order = access.pendingOrder;
+
+  if (isPayosOrder(order)) {
+    renderPayosPending(order, { autoRedirect: false });
+    return;
+  }
+
+  main.innerHTML = `
+    <section class="room3d-paywall">
+      <div class="room3d-paywall-card">
+        <p class="section-kicker">ROOMI 3D</p>
+        <h1>Mở khóa mô phỏng 3D</h1>
+        <p>Thanh toán một lần để xem và xoay không gian 3D của ROOMI.</p>
+        <strong class="room3d-price">${formatCurrency(access.price || 0)}</strong>
+        ${
+          order
+            ? renderRoom3DPaymentV2(order)
+            : '<button class="btn btn-maroon" type="button" data-room3d-buy>Mở khóa ngay</button>'
+        }
+        <p class="room3d-paywall-note" data-room3d-note></p>
+      </div>
+    </section>
+  `;
+
+  if (order) {
+    pollRoom3DOrder(order.code);
+  }
+}
+
+function renderRoom3DPayment(order) {
+  const payment = order.payment || {};
+  const qrMarkup = payment.qrUrl
+    ? `<img class="room3d-qr" src="${escapeHtml(payment.qrUrl)}" alt="QR thanh toán mở khóa 3D">`
+    : '<div class="room3d-qr-missing">Chưa cấu hình QR nhận tiền.</div>';
+
+  return `
+    <div class="room3d-payment">
+      ${qrMarkup}
+      <div class="room3d-payment-info">
+        <span>Mã đơn</span>
+        <strong>${escapeHtml(order.code)}</strong>
+        <span>Số tiền</span>
+        <strong>${formatCurrency(order.total || payment.amount || 0)}</strong>
+        <span>Nội dung chuyển khoản</span>
+        <strong>${escapeHtml(payment.transferContent || order.code)}</strong>
+        <p data-room3d-payment-status>Trang sẽ tự mở khóa sau khi thanh toán được xác nhận.</p>
+      </div>
+    </div>
+  `;
+}
+
+function renderRoom3DPaymentV2(order) {
+  const payment = order.payment || {};
+  const isPayos = payment.provider === 'PAYOS';
+  const payosQrImage = isPayos && /^(https?:|data:image)/.test(payment.qrCode || '') ? payment.qrCode : '';
+  const transferLabel = isPayos ? 'Mã thanh toán' : 'Nội dung chuyển khoản';
+  const transferValue = payment.transferContent || order.code;
+
+  const qrMarkup = payment.qrUrl
+    ? `<img class="room3d-qr" src="${escapeHtml(payment.qrUrl)}" alt="QR thanh toán mở khóa 3D">`
+    : payosQrImage
+      ? `<img class="room3d-qr" src="${escapeHtml(payosQrImage)}" alt="QR payOS mở khóa 3D">`
+      : isPayos && payment.checkoutUrl
+        ? `
+          <div class="room3d-qr-missing room3d-payos-card">
+            <strong>Thanh toán qua payOS</strong>
+            <p>payOS sẽ hiển thị mã QR tự động ở trang thanh toán.</p>
+            <a class="btn btn-maroon" href="${escapeHtml(payment.checkoutUrl)}">Mở QR payOS</a>
+          </div>
+        `
+        : '<div class="room3d-qr-missing">Chưa cấu hình QR nhận tiền.</div>';
+
+  return `
+    <div class="room3d-payment">
+      ${qrMarkup}
+      <div class="room3d-payment-info">
+        <span>Mã đơn</span>
+        <strong>${escapeHtml(order.code)}</strong>
+        <span>Số tiền</span>
+        <strong>${formatCurrency(order.total || payment.amount || 0)}</strong>
+        <span>${transferLabel}</span>
+        <strong>${escapeHtml(transferValue)}</strong>
+        ${
+          isPayos && payment.checkoutUrl
+            ? `<a class="btn btn-outline room3d-payment-link" href="${escapeHtml(payment.checkoutUrl)}">Tiếp tục thanh toán payOS</a>`
+            : ''
+        }
+        <p data-room3d-payment-status>Trang sẽ tự mở khóa sau khi thanh toán được xác nhận.</p>
+      </div>
+    </div>
+  `;
+}
+
+function clearPaymentPoll() {
+  if (paymentPollTimer) {
+    window.clearTimeout(paymentPollTimer);
+    paymentPollTimer = null;
+  }
+}
+
+window.addEventListener('pagehide', clearPaymentPoll);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearPaymentPoll();
+  }
+});
+
+function unlockViewer() {
+  clearPaymentPoll();
+  const main = document.querySelector('.room3d-main');
+  if (!main) return;
+
+  main.innerHTML = viewerMarkup();
+  initRoomPreview();
+}
+
+function pollRoom3DOrder(code, attempt = 0, startedAt = Date.now()) {
+  clearPaymentPoll();
+
+  if (!code || Date.now() - startedAt >= PAYMENT_POLL_LIMIT_MS) {
+    const status = document.querySelector('[data-room3d-payment-status]');
+    if (status) {
+      status.textContent = 'Đã dừng tự động kiểm tra sau 2 phút. Bạn có thể tải lại trang nếu đã thanh toán.';
+    }
+    return;
+  }
+
+  paymentPollTimer = window.setTimeout(async () => {
+    try {
+      const response = await apiFetch(`/orders/${encodeURIComponent(code)}`);
+      const order = response.data;
+      const status = document.querySelector('[data-room3d-payment-status]');
+
+      if (order.paymentStatus === 'PAID') {
+        sessionStorage.removeItem(CANCELLED_ORDER_KEY);
+        if (status) status.textContent = 'Đã thanh toán. Đang mở khóa mô phỏng 3D...';
+        unlockViewer();
+        return;
+      }
+
+      if (status && attempt >= 4) {
+        status.textContent = 'Đang chờ ngân hàng xác nhận giao dịch...';
+      }
+    } catch (_error) {
+      // Keep polling; transient network issues should not trap the user.
+    }
+
+    pollRoom3DOrder(code, attempt + 1, startedAt);
+  }, Math.min(attempt < 2 ? 2000 : 4000, PAYMENT_POLL_LIMIT_MS - (Date.now() - startedAt)));
+}
+
+document.addEventListener('click', async (event) => {
+  const buyButton = event.target.closest('[data-room3d-buy]');
+  if (!buyButton) return;
+
+  buyButton.disabled = true;
+  buyButton.textContent = 'Đang tạo mã thanh toán...';
+  const note = document.querySelector('[data-room3d-note]');
+  if (note) note.textContent = '';
+
+  try {
+    const response = await apiFetch('/room3d/orders', {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+    const access = response.data;
+
+    if (access?.hasAccess) {
+      unlockViewer();
+      return;
+    }
+
+    if (isPayosOrder(access?.pendingOrder)) {
+      renderPayosPending(access.pendingOrder, { autoRedirect: true });
+      return;
+    }
+
+    renderPaywall(access);
+  } catch (error) {
+    buyButton.disabled = false;
+    buyButton.textContent = 'Mở khóa ngay';
+    if (note) note.textContent = error.message || 'Không tạo được mã thanh toán.';
+  }
+});
 
 function initRoomPreview() {
   const canvas = document.querySelector('[data-room3d-canvas]');

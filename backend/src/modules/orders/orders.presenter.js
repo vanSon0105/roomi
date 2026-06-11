@@ -68,6 +68,7 @@ const serializeOrder = (order) => {
   return {
     id: order.id,
     code: order.code,
+    orderType: order.orderType || 'PRODUCT',
     recipientName: order.recipientName,
     recipientPhone: order.recipientPhone,
     shippingLine1: order.shippingLine1,

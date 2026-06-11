@@ -1,7 +1,7 @@
 const { z } = require('zod');
 
 const orderStatuses = ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'COMPLETED', 'CANCELLED'];
-const paymentStatuses = ['UNPAID', 'PAID', 'REFUNDED'];
+const paymentStatuses = ['UNPAID', 'PAID', 'REFUNDED', 'CANCELLED'];
 const productStatuses = ['DRAFT', 'ACTIVE', 'ARCHIVED'];
 const roles = ['USER', 'ADMIN'];
 

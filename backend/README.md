@@ -112,6 +112,8 @@ SEPAY_WEBHOOK_API_KEY=""
 SEPAY_WEBHOOK_URL=""
 ```
 
+`SEPAY_WEBHOOK_API_KEY` is required for SePay automatic confirmation. The webhook returns `503` when this key is not configured, so keep the same value in SePay's webhook authorization header.
+
 ## API
 
 Base URL:

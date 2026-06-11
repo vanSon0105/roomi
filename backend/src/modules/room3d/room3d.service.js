@@ -11,6 +11,7 @@ const room3dRepository = require('./room3d.repository');
 
 const ROOM3D_PRICE_KEY = 'room3d_price';
 const ROOM3D_ITEM_NAME = 'Quyền xem mô phỏng 3D ROOMI';
+const PENDING_ORDER_TTL_MS = 15 * 60 * 1000;
 
 const toNumber = (value) => Number(value || 0);
 const toMoney = (value) => Number(value || 0).toFixed(2);
@@ -72,9 +73,9 @@ const findPendingOrder = async (userId, paymentMethod = null, price = null) => {
     return null;
   }
 
-  // Exclude if order is older than 2 minutes (stale, frontend already stopped polling)
+  // Avoid reusing stale payment links, but keep enough time for real payment flows.
   const ageMs = Date.now() - new Date(order.createdAt).getTime();
-  if (ageMs > 2 * 60 * 1000) {
+  if (ageMs > PENDING_ORDER_TTL_MS) {
     return null;
   }
 

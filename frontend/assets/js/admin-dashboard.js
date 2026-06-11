@@ -9,7 +9,7 @@ import {
   renderAdminError,
   renderAdminShell,
   statusBadge,
-} from './admin-common.js?v=admin-room3d-1';
+} from './admin-common.js?v=admin-payment-cancel-1';
 
 renderAdminShell('dashboard');
 

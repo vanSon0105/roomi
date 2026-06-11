@@ -30,7 +30,6 @@ const buildVietQrUrl = ({ amount, transferContent }) => {
 
 const buildSeVqrUrl = ({ amount, transferContent }) => {
   if (!hasSepayQrConfig()) {
-    console.log('[SEVQR] Config missing — accountNo:', Boolean(config.sepay.accountNo), 'qrBankName:', Boolean(config.sepay.qrBankName));
     return null;
   }
 
@@ -41,9 +40,7 @@ const buildSeVqrUrl = ({ amount, transferContent }) => {
     des: transferContent,
   });
 
-  const url = `${config.sepay.qrBaseUrl}?${params.toString()}`;
-  console.log('[SEVQR] Generated QR URL:', url);
-  return url;
+  return `${config.sepay.qrBaseUrl}?${params.toString()}`;
 };
 
 const serializeOrderItem = (item) => ({
@@ -104,6 +101,27 @@ const serializeOrder = (order) => {
   };
 };
 
+const serializePublicOrder = (order) => {
+  const serialized = serializeOrder(order);
+
+  return {
+    code: serialized.code,
+    orderType: serialized.orderType,
+    status: serialized.status,
+    paymentStatus: serialized.paymentStatus,
+    paymentMethod: serialized.paymentMethod,
+    subtotal: serialized.subtotal,
+    shippingFee: serialized.shippingFee,
+    discountAmount: serialized.discountAmount,
+    total: serialized.total,
+    paymentReportedAt: serialized.paymentReportedAt,
+    payment: serialized.payment,
+    createdAt: serialized.createdAt,
+    updatedAt: serialized.updatedAt,
+  };
+};
+
 module.exports = {
   serializeOrder,
+  serializePublicOrder,
 };

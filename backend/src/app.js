@@ -61,7 +61,12 @@ app.use(
     maxAge: '7d',
     etag: true,
     setHeaders: (res, filePath) => {
-      if (path.extname(filePath).toLowerCase() === '.html') {
+      const extension = path.extname(filePath).toLowerCase();
+      const normalizedPath = filePath.split(path.sep).join('/');
+      const isAdminScript =
+        extension === '.js' && normalizedPath.includes('/frontend/assets/js/admin');
+
+      if (extension === '.html' || isAdminScript) {
         res.setHeader('Cache-Control', 'no-cache');
       }
     },

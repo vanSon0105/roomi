@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const config = require('../../config/env');
 const AppError = require('../../utils/app-error');
 const ordersRepository = require('./orders.repository');
-const { serializeOrder } = require('./orders.presenter');
+const { serializeOrder, serializePublicOrder } = require('./orders.presenter');
 const paymentsService = require('../payments/payments.service');
 const settingsService = require('../settings/settings.service');
 
@@ -148,7 +148,7 @@ const getOrderPublic = async (code) => {
     throw new AppError('Order not found', 404);
   }
 
-  return serializeOrder(order);
+  return serializePublicOrder(order);
 };
 
 const getOrderByProviderCode = async (providerOrderCode) => {
@@ -161,7 +161,7 @@ const getOrderByProviderCode = async (providerOrderCode) => {
     throw new AppError('Order not found', 404);
   }
 
-  return serializeOrder(transaction.order);
+  return serializePublicOrder(transaction.order);
 };
 
 const removeOrderItemsFromCart = ordersRepository.removeOrderItemsFromCart;

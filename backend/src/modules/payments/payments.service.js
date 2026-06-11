@@ -11,6 +11,7 @@ const toNumber = (value) => (value == null ? 0 : Number(value));
 const toMoney = (value) => Number(value).toFixed(2);
 
 let payosClient = null;
+let payosClientSignature = null;
 
 const isPayosConfigured = () =>
   Boolean(config.payos.clientId && config.payos.apiKey && config.payos.checksumKey);
@@ -23,16 +24,29 @@ const getPayosClient = () => {
     throw new AppError('payOS is not configured', 400);
   }
 
-  if (!payosClient) {
+  const signature = [
+    config.payos.clientId,
+    config.payos.apiKey,
+    config.payos.checksumKey,
+    config.payos.partnerCode,
+  ].join('|');
+
+  if (!payosClient || payosClientSignature !== signature) {
     payosClient = new PayOS({
       clientId: config.payos.clientId,
       apiKey: config.payos.apiKey,
       checksumKey: config.payos.checksumKey,
       partnerCode: config.payos.partnerCode || undefined,
     });
+    payosClientSignature = signature;
   }
 
   return payosClient;
+};
+
+const resetPayosClient = () => {
+  payosClient = null;
+  payosClientSignature = null;
 };
 
 const appendQuery = (url, params) => {
@@ -110,7 +124,7 @@ const normalizeHeaderValue = (value = '') =>
 
 const verifySepayWebhookAuth = (headers = {}) => {
   if (!config.sepay.webhookApiKey) {
-    return;
+    throw new AppError('SePay webhook API key is not configured', 503);
   }
 
   const authorization = normalizeHeaderValue(headers.authorization || headers.Authorization);
@@ -489,4 +503,5 @@ module.exports = {
   handlePayosWebhook,
   handleSepayWebhook,
   isPayosConfigured,
+  resetPayosClient,
 };

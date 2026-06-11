@@ -208,15 +208,3 @@ ADD CONSTRAINT `order_items_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `or
 -- AddForeignKey
 ALTER TABLE `order_items`
 ADD CONSTRAINT `order_items_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
-
-use chithuy;
-
-select * from products;
-
-select * from product_images;
-
-select * from users;
-
-UPDATE users
-SET email = 'admin@roomi.com'
-WHERE email = 'admin@roomi.com.vn';

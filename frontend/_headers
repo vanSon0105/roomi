@@ -1,0 +1,8 @@
+/pages/admin/*
+  Cache-Control: no-cache
+
+/assets/js/admin*.js
+  Cache-Control: no-cache
+
+/assets/js/admin-common.js
+  Cache-Control: no-cache

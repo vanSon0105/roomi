@@ -5,7 +5,7 @@ import {
   formatDate,
   renderAdminError,
   renderAdminShell,
-} from './admin-common.js?v=admin-room3d-1';
+} from './admin-common.js?v=admin-payment-cancel-1';
 
 renderAdminShell('room-3d');
 

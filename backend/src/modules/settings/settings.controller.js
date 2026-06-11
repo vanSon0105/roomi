@@ -1,6 +1,7 @@
 const config = require('../../config/env');
 const asyncHandler = require('../../utils/async-handler');
 const { sendSuccess } = require('../../utils/api-response');
+const paymentsService = require('../payments/payments.service');
 const settingsService = require('./settings.service');
 
 const getTransferProvider = asyncHandler(async (_req, res) => {
@@ -26,6 +27,7 @@ const updateAdminSettings = asyncHandler(async (req, res) => {
 
   // Sync in-memory config so running server picks up changes
   await config.syncFromDb();
+  paymentsService.resetPayosClient();
 
   sendSuccess(res, {
     message: 'Settings updated successfully',

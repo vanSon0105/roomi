@@ -303,7 +303,6 @@ function pollRoom3DOrder(code, attempt = 0, startedAt = Date.now()) {
       const status = document.querySelector('[data-room3d-payment-status]');
 
       if (order.paymentStatus === 'PAID') {
-        sessionStorage.removeItem(CANCELLED_ORDER_KEY);
         if (status) status.textContent = 'Đã thanh toán. Đang mở khóa mô phỏng 3D...';
         unlockViewer();
         return;

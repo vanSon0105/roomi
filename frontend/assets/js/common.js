@@ -341,16 +341,20 @@ export function miniArt(label = 'Ảnh sản phẩm', imageUrl = '') {
 export function productCard(product, index = 0) {
   const slug = product.slug || product.id;
   const categoryText = product.categoryLabel || product.category || '';
+  const isOutOfStock = Number(product.stock || 0) <= 0;
 
   return `
-    <a class="product-card" style="--index:${index}" href="${pageHref('product-detail.html')}?id=${encodeURIComponent(slug)}" aria-label="${escapeHtml(product.name)}">
-      ${productArt(product.name, product.imageUrl)}
+    <a class="product-card ${isOutOfStock ? 'is-out-of-stock' : ''}" style="--index:${index}" href="${pageHref('product-detail.html')}?id=${encodeURIComponent(slug)}" aria-label="${escapeHtml(product.name)}">
+      <div class="product-card-media">
+        ${productArt(product.name, product.imageUrl)}
+        ${isOutOfStock ? '<span class="stock-badge">Hết hàng</span>' : ''}
+      </div>
       <div class="product-info">
         <h3>${escapeHtml(product.name)}</h3>
         <div class="stars">${stars(product.rating)}</div>
         <div class="product-meta">
           <strong>${formatCurrency(product.price)}</strong>
-          <span>${escapeHtml(categoryText)}</span>
+          <span>${isOutOfStock ? 'Tạm hết hàng' : escapeHtml(categoryText)}</span>
         </div>
       </div>
     </a>
@@ -561,4 +565,3 @@ document.addEventListener('DOMContentLoaded', () => {
 window.addEventListener('load', () => {
   if (!chatFormBound) { bindChatForm(); chatFormBound = true; }
 });
-

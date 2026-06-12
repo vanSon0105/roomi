@@ -674,6 +674,10 @@ button {
   transition-delay: calc(var(--index, 0) * 55ms);
 }
 
+.product-card-media {
+  position: relative;
+}
+
 .product-card.is-visible {
   opacity: 1;
   transform: translateY(0);
@@ -697,6 +701,28 @@ button {
 
 .product-card:hover .product-art {
   transform: translateY(-8px) scale(1.015);
+}
+
+.product-card.is-out-of-stock .product-art img {
+  filter: grayscale(0.35);
+  opacity: 0.66;
+}
+
+.stock-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 1;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding-inline: 16px;
+  background: var(--maroon);
+  color: var(--cream);
+  font-size: 0.92rem;
+  font-weight: 1000;
+  box-shadow: 0 12px 22px rgba(80, 0, 0, 0.22);
 }
 
 .product-placeholder {
@@ -1591,11 +1617,45 @@ button {
   line-height: 1;
 }
 
+.detail-stock {
+  margin: 20px 0 0;
+  color: rgba(80, 0, 0, 0.72);
+  font-size: 1.12rem;
+  font-weight: 900;
+}
+
+.detail-stock.is-out-of-stock,
+.product-action-notice {
+  color: var(--maroon);
+}
+
 .detail-actions {
   margin-top: 42px;
   display: flex;
   flex-wrap: wrap;
   gap: 28px;
+}
+
+.product-action-notice {
+  min-height: 24px;
+  margin: 18px 0 0;
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.55;
+}
+
+.btn:disabled,
+.buy-now-stepper button:disabled,
+.qty button:disabled,
+.select-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.btn:disabled,
+.buy-now-stepper button:disabled,
+.qty button:disabled {
+  transform: none;
 }
 
 .modal-open {
@@ -1798,11 +1858,31 @@ button {
   font-weight: 900;
 }
 
+.cart-row.is-unavailable {
+  background: #fff1ee;
+}
+
 .cart-product {
   display: grid;
   grid-template-columns: auto 92px 1fr;
   align-items: center;
   gap: 20px;
+}
+
+.cart-product-name {
+  display: grid;
+  gap: 8px;
+}
+
+.cart-product-name span {
+  color: rgba(80, 0, 0, 0.64);
+  font-size: 0.88rem;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.cart-product-name span.is-warning {
+  color: var(--maroon);
 }
 
 .cart-row-controls {
@@ -1898,6 +1978,15 @@ button {
 .cart-summary .btn.is-disabled {
   pointer-events: none;
   opacity: 0.55;
+}
+
+.cart-notice {
+  margin: 0;
+  padding: 0 34px 22px;
+  background: var(--maroon);
+  color: var(--cream);
+  font-size: 1rem;
+  font-weight: 900;
 }
 
 .checkout-title-row {

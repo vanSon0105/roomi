@@ -55,12 +55,23 @@ const createOrder = async (userId, payload) => {
       throw new AppError('No selected cart items found', 400);
     }
 
-    const unavailableItem = checkoutItems.find(
-      (item) => item.product.status !== 'ACTIVE' || item.product.stock < item.quantity,
-    );
+    const unavailableItem = checkoutItems.find((item) => {
+      return item.product.status !== 'ACTIVE' || item.product.stock < item.quantity;
+    });
 
     if (unavailableItem) {
-      throw new AppError(`Product ${unavailableItem.product.name} is not available`, 409);
+      if (unavailableItem.product.status !== 'ACTIVE') {
+        throw new AppError(`Sản phẩm "${unavailableItem.product.name}" hiện không còn được bán.`, 409);
+      }
+
+      if (unavailableItem.product.stock <= 0) {
+        throw new AppError(`Sản phẩm "${unavailableItem.product.name}" đã hết hàng, bạn vui lòng xóa khỏi giỏ.`, 409);
+      }
+
+      throw new AppError(
+        `Sản phẩm "${unavailableItem.product.name}" chỉ còn ${unavailableItem.product.stock} sản phẩm, bạn vui lòng giảm số lượng.`,
+        409,
+      );
     }
 
     const orderCode = generateOrderCode();

@@ -1,5 +1,5 @@
 ﻿import { formatCurrency } from './data.js';
-import { apiFetch, escapeHtml, homeHref, miniArt, observeReveal, pageHref, renderShell } from './common.js?v=pages-path-1';
+import { apiFetch, escapeHtml, homeHref, miniArt, observeReveal, pageHref, renderShell } from './common.js?v=stock-1';
 
 renderShell('cart');
 
@@ -48,6 +48,24 @@ function getCheckoutItems(cart) {
 
   const selectedIdSet = new Set(selectedIds);
   return cart.items.filter((item) => selectedIdSet.has(item.id));
+}
+
+function getCheckoutItemNotice(item) {
+  const stock = Number(item.product?.stock || 0);
+
+  if (item.product?.status !== 'ACTIVE') {
+    return `Sản phẩm "${item.product?.name || ''}" hiện không còn được bán.`;
+  }
+
+  if (stock <= 0) {
+    return `Sản phẩm "${item.product?.name || ''}" đã hết hàng, bạn vui lòng xóa khỏi giỏ.`;
+  }
+
+  if (item.quantity > stock) {
+    return `Sản phẩm "${item.product?.name || ''}" chỉ còn ${stock} sản phẩm, bạn vui lòng giảm số lượng.`;
+  }
+
+  return '';
 }
 
 function setPaymentLayout(isActive) {
@@ -554,6 +572,21 @@ function renderCheckout(cart) {
         <div>
           <h1>Chưa chọn sản phẩm</h1>
           <p>Quay lại giỏ hàng và tick vào sản phẩm bạn muốn thanh toán trước.</p>
+          <a class="btn btn-maroon" href="${pageHref('cart.html')}">Quay lại giỏ hàng</a>
+        </div>
+      </section>
+    `;
+    observeReveal();
+    return;
+  }
+
+  const unavailableNotice = checkoutItems.map(getCheckoutItemNotice).find(Boolean);
+  if (unavailableNotice) {
+    root.innerHTML = `
+      <section class="locked-state container reveal">
+        <div>
+          <h1>Chưa thể thanh toán</h1>
+          <p>${escapeHtml(unavailableNotice)}</p>
           <a class="btn btn-maroon" href="${pageHref('cart.html')}">Quay lại giỏ hàng</a>
         </div>
       </section>

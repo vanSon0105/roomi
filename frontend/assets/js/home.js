@@ -1,4 +1,4 @@
-﻿import { apiFetch, escapeHtml, observeReveal, productCard, renderShell } from './common.js?v=pages-path-1';
+﻿import { apiFetch, escapeHtml, observeReveal, productCard, renderShell } from './common.js?v=stock-1';
 
 renderShell('home');
 

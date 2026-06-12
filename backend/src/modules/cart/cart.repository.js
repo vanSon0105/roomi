@@ -80,10 +80,21 @@ const findItemWithCart = (itemId) =>
   prisma.cartItem.findUnique({
     where: { id: itemId },
     include: {
+      product: true,
       cart: {
         select: {
           userId: true,
         },
+      },
+    },
+  });
+
+const findItemForCartProduct = ({ cartId, productId }) =>
+  prisma.cartItem.findUnique({
+    where: {
+      cartId_productId: {
+        cartId,
+        productId,
       },
     },
   });
@@ -103,6 +114,7 @@ module.exports = {
   deleteItem,
   findByUserId,
   findItemWithCart,
+  findItemForCartProduct,
   findOrCreateByUserId,
   findProductForCart,
   updateItemQuantity,

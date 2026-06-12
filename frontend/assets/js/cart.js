@@ -1,5 +1,5 @@
 ﻿import { formatCurrency } from './data.js';
-import { apiFetch, escapeHtml, miniArt, observeReveal, pageHref, renderShell } from './common.js?v=pages-path-1';
+import { apiFetch, escapeHtml, miniArt, observeReveal, pageHref, renderShell } from './common.js?v=stock-1';
 
 renderShell('cart');
 
@@ -7,6 +7,7 @@ const root = document.querySelector('#cartRoot');
 const SELECTED_CART_STORAGE_KEY = 'roomi_selected_cart_items';
 let cart = null;
 let selectedCartItemIds = new Set();
+let cartFeedbackMessage = '';
 
 function readSelectedCartItems() {
   try {
@@ -24,9 +25,37 @@ function writeSelectedCartItems() {
 function syncSelectedCartItems() {
   if (!cart) return;
 
-  const availableIds = new Set(cart.items.map((item) => item.id));
+  const availableIds = new Set(cart.items.filter(canCheckoutItem).map((item) => item.id));
   selectedCartItemIds = new Set([...selectedCartItemIds].filter((id) => availableIds.has(id)));
   writeSelectedCartItems();
+}
+
+function getCartItemNotice(item) {
+  const stock = Number(item.product?.stock || 0);
+
+  if (item.product?.status !== 'ACTIVE') {
+    return 'Sản phẩm hiện không còn được bán.';
+  }
+
+  if (stock <= 0) {
+    return 'Sản phẩm đã hết hàng, bạn vui lòng xóa khỏi giỏ.';
+  }
+
+  if (item.quantity > stock) {
+    return `Chỉ còn ${stock} sản phẩm, bạn vui lòng giảm số lượng.`;
+  }
+
+  return '';
+}
+
+function canCheckoutItem(item) {
+  return !getCartItemNotice(item);
+}
+
+function getStockText(item) {
+  const notice = getCartItemNotice(item);
+  if (notice) return notice;
+  return `Còn ${Number(item.product?.stock || 0)} sản phẩm`;
 }
 
 function renderLoading() {
@@ -68,7 +97,7 @@ function renderCart() {
     return;
   }
 
-  const selectedItems = cart.items.filter((item) => selectedCartItemIds.has(item.id));
+  const selectedItems = cart.items.filter((item) => selectedCartItemIds.has(item.id) && canCheckoutItem(item));
   const selectedSubtotal = selectedItems.reduce((sum, item) => sum + item.total, 0);
   const selectedCount = selectedItems.reduce((sum, item) => sum + item.quantity, 0);
   const canCheckout = selectedItems.length > 0;
@@ -86,39 +115,49 @@ function renderCart() {
           <span>Thành tiền</span>
         </div>
         ${cart.items
-          .map(
-            (item) => `
-              <article class="cart-row">
+          .map((item) => {
+            const notice = getCartItemNotice(item);
+            const canSelect = !notice;
+            const stock = Number(item.product?.stock || 0);
+            const selected = selectedCartItemIds.has(item.id);
+
+            return `
+              <article class="cart-row ${notice ? 'is-unavailable' : ''}">
                 <div class="cart-product">
                   <div class="cart-row-controls">
                     <button
-                      class="select-button ${selectedCartItemIds.has(item.id) ? 'is-selected' : ''}"
+                      class="select-button ${selected ? 'is-selected' : ''}"
                       type="button"
                       data-select="${item.id}"
-                      aria-label="${selectedCartItemIds.has(item.id) ? 'Bỏ chọn sản phẩm' : 'Chọn sản phẩm để thanh toán'}"
-                      aria-pressed="${selectedCartItemIds.has(item.id) ? 'true' : 'false'}"
+                      aria-label="${selected ? 'Bỏ chọn sản phẩm' : 'Chọn sản phẩm để thanh toán'}"
+                      aria-pressed="${selected ? 'true' : 'false'}"
+                      ${canSelect ? '' : 'disabled'}
                     ></button>
                     <button class="remove-button" type="button" data-remove="${item.id}" aria-label="Xóa sản phẩm">&times;</button>
                   </div>
                   ${miniArt(item.product.name, item.product.imageUrl)}
-                  <strong>${escapeHtml(item.product.name)}</strong>
+                  <div class="cart-product-name">
+                    <strong>${escapeHtml(item.product.name)}</strong>
+                    <span class="${notice ? 'is-warning' : ''}">${escapeHtml(getStockText(item))}</span>
+                  </div>
                 </div>
                 <span>${formatCurrency(item.product.price)}</span>
                 <div class="qty">
                   <button type="button" data-decrease="${item.id}" aria-label="Giảm số lượng">-</button>
                   <strong>${item.quantity}</strong>
-                  <button type="button" data-increase="${item.id}" aria-label="Tăng số lượng">+</button>
+                  <button type="button" data-increase="${item.id}" aria-label="Tăng số lượng" ${notice || item.quantity >= stock ? 'disabled' : ''}>+</button>
                 </div>
                 <strong>${formatCurrency(item.total)}</strong>
               </article>
-            `,
-          )
+            `;
+          })
           .join('')}
         <div class="cart-summary">
           <span>${canCheckout ? `Đã chọn ${selectedCount} sản phẩm` : 'Chọn sản phẩm để thanh toán'}</span>
           <strong>${formatCurrency(selectedSubtotal)}</strong>
           <a class="btn btn-cream ${canCheckout ? '' : 'is-disabled'}" href="${canCheckout ? pageHref('checkout.html') : '#'}" data-checkout-link aria-disabled="${canCheckout ? 'false' : 'true'}">Thanh toán</a>
         </div>
+        ${cartFeedbackMessage ? `<p class="cart-notice">${escapeHtml(cartFeedbackMessage)}</p>` : ''}
       </div>
     </section>
   `;
@@ -169,6 +208,13 @@ root?.addEventListener('click', async (event) => {
 
   if (select) {
     const itemId = Number(select.dataset.select);
+    const item = cart.items.find((cartItem) => cartItem.id === itemId);
+
+    if (item && !canCheckoutItem(item)) {
+      cartFeedbackMessage = getCartItemNotice(item);
+      renderCart();
+      return;
+    }
 
     if (selectedCartItemIds.has(itemId)) {
       selectedCartItemIds.delete(itemId);
@@ -176,6 +222,7 @@ root?.addEventListener('click', async (event) => {
       selectedCartItemIds.add(itemId);
     }
 
+    cartFeedbackMessage = '';
     writeSelectedCartItems();
     renderCart();
     return;
@@ -185,6 +232,7 @@ root?.addEventListener('click', async (event) => {
 
   try {
     if (remove) {
+      cartFeedbackMessage = '';
       await updateCartFromResponse(apiFetch(`/cart/items/${remove.dataset.remove}`, { method: 'DELETE' }));
       return;
     }
@@ -194,6 +242,7 @@ root?.addEventListener('click', async (event) => {
     if (!item) return;
 
     const quantity = increase ? item.quantity + 1 : item.quantity - 1;
+    cartFeedbackMessage = '';
     await updateCartFromResponse(
       apiFetch(`/cart/items/${itemId}`, {
         method: 'PATCH',
@@ -201,7 +250,8 @@ root?.addEventListener('click', async (event) => {
       }),
     );
   } catch (error) {
-    renderError(error);
+    cartFeedbackMessage = error.message || 'Không cập nhật được giỏ hàng.';
+    renderCart();
   }
 });
 

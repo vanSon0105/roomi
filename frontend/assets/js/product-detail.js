@@ -10,7 +10,7 @@ import {
   redirectToLogin,
   renderShell,
   stars,
-} from './common.js?v=pages-path-1';
+} from './common.js?v=stock-1';
 
 renderShell('products');
 
@@ -41,6 +41,10 @@ function renderError(error) {
 
 function renderProduct(product, related) {
   if (!root) return;
+  const stock = Number(product.stock || 0);
+  const isOutOfStock = stock <= 0;
+  const stockText = isOutOfStock ? 'Hết hàng' : `Còn ${stock} sản phẩm`;
+  const disabledAttr = isOutOfStock ? 'disabled aria-disabled="true"' : '';
 
   const bullets = product.bullets?.length
     ? product.bullets
@@ -61,10 +65,12 @@ function renderProduct(product, related) {
           <span>${escapeHtml(product.categoryLabel || '')}</span>
         </div>
         <div class="detail-price">${formatCurrency(product.price)}</div>
+        <p class="detail-stock ${isOutOfStock ? 'is-out-of-stock' : ''}">${stockText}</p>
         <div class="detail-actions">
-          <button class="btn btn-maroon" type="button" data-add-to-cart>Thêm vào giỏ</button>
-          <button class="btn btn-outline" type="button" data-buy-now>Mua ngay</button>
+          <button class="btn btn-maroon" type="button" data-add-to-cart ${disabledAttr}>Thêm vào giỏ</button>
+          <button class="btn btn-outline" type="button" data-buy-now ${disabledAttr}>Mua ngay</button>
         </div>
+        <p class="product-action-notice" data-product-action-notice>${isOutOfStock ? 'Sản phẩm này đang hết hàng, bạn vui lòng chọn mẫu khác hoặc quay lại sau.' : ''}</p>
       </article>
     </section>
 
@@ -96,22 +102,33 @@ function renderProduct(product, related) {
           <div>
             <h2>${escapeHtml(product.name)}</h2>
             <strong>${formatCurrency(product.price)}</strong>
-            <p>${Number(product.stock) > 0 ? `Còn ${Number(product.stock)} sản phẩm` : 'Sản phẩm sẵn sàng đặt hàng'}</p>
+            <p>${stockText}</p>
           </div>
         </div>
         <div class="buy-now-control">
           <span>Số lượng</span>
           <div class="buy-now-stepper">
-            <button type="button" data-buy-now-qty="decrease" aria-label="Giảm số lượng">-</button>
-            <input type="text" value="1" inputmode="numeric" data-buy-now-input aria-label="Số lượng mua ngay">
-            <button type="button" data-buy-now-qty="increase" aria-label="Tăng số lượng">+</button>
+            <button type="button" data-buy-now-qty="decrease" aria-label="Giảm số lượng" ${disabledAttr}>-</button>
+            <input type="text" value="1" inputmode="numeric" data-buy-now-input aria-label="Số lượng mua ngay" ${disabledAttr}>
+            <button type="button" data-buy-now-qty="increase" aria-label="Tăng số lượng" ${disabledAttr}>+</button>
           </div>
         </div>
-        <p class="buy-now-notice" data-buy-now-notice></p>
-        <button class="btn btn-maroon buy-now-confirm" type="button" data-buy-now-confirm>Xác nhận</button>
+        <p class="buy-now-notice" data-buy-now-notice>${isOutOfStock ? 'Sản phẩm hiện đã hết hàng nên chưa thể đặt mua.' : ''}</p>
+        <button class="btn btn-maroon buy-now-confirm" type="button" data-buy-now-confirm ${disabledAttr}>Xác nhận</button>
       </section>
     </div>
   `;
+}
+
+function isCurrentProductOutOfStock() {
+  return Number(currentProduct?.stock || 0) <= 0;
+}
+
+function showProductNotice(message) {
+  const notice = root?.querySelector('[data-product-action-notice]');
+  if (notice) {
+    notice.textContent = message;
+  }
 }
 
 function getBuyNowLimit() {
@@ -139,6 +156,11 @@ function openBuyNowModal() {
   const modal = root?.querySelector('[data-buy-now-modal]');
   const notice = root?.querySelector('[data-buy-now-notice]');
 
+  if (isCurrentProductOutOfStock()) {
+    showProductNotice('Sản phẩm này đang hết hàng, chưa thể thêm vào giỏ hoặc mua ngay.');
+    return;
+  }
+
   setBuyNowQuantity(1);
 
   if (notice) {
@@ -160,6 +182,11 @@ function closeBuyNowModal() {
 
 async function addToCart(button) {
   if (!currentProduct) return;
+
+  if (isCurrentProductOutOfStock()) {
+    showProductNotice('Sản phẩm này đang hết hàng, chưa thể thêm vào giỏ.');
+    return;
+  }
 
   const originalText = button.textContent;
   button.disabled = true;
@@ -194,6 +221,13 @@ async function confirmBuyNow(button) {
 
   const notice = root?.querySelector('[data-buy-now-notice]');
   const originalText = button.textContent;
+
+  if (isCurrentProductOutOfStock()) {
+    if (notice) {
+      notice.textContent = 'Sản phẩm hiện đã hết hàng nên chưa thể đặt mua.';
+    }
+    return;
+  }
 
   button.disabled = true;
   button.textContent = 'Đang xử lý...';

@@ -24,6 +24,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        'upgrade-insecure-requests': null,
         'script-src': ["'self'", 'https://unpkg.com', 'https://esm.sh'],
         'style-src': [
           "'self'",

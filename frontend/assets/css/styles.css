@@ -4198,6 +4198,50 @@ body.checkout-payment-page .payment-actions .btn:disabled {
     right: 14px;
     bottom: 88px;
   }
+
+  .chat-send {
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .chat-send input {
+    min-width: 0;
+    padding-inline: 16px;
+  }
+
+  .chat-send button {
+    flex: 0 0 auto;
+    padding-inline: 18px;
+  }
+}
+
+@media (max-width: 420px) {
+  .chat-panel {
+    right: 8px;
+    bottom: 82px;
+    width: calc(100vw - 16px);
+    padding: 16px;
+    border-radius: 22px;
+  }
+
+  .chat-messages {
+    padding: 12px;
+  }
+
+  .chat-send {
+    padding: 10px 0 0;
+  }
+
+  .chat-send input {
+    font-size: 15px;
+    padding-inline: 14px;
+  }
+
+  .chat-send button {
+    min-width: 56px;
+    padding-inline: 14px;
+    font-size: 15px;
+  }
 }
 
 @media (max-height: 820px) {
@@ -5428,4 +5472,97 @@ body[data-admin-page="chat"] .admin-main {
 
 .admin-chat-msg .chat-line.right {
   justify-content: flex-end;
+}
+
+@media (max-width: 840px) {
+  body[data-admin-page="chat"] .admin-main {
+    max-height: none;
+    overflow: visible;
+  }
+
+  body[data-admin-page="chat"] .admin-view {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  #adminChat {
+    flex: none;
+    min-height: auto;
+  }
+
+  #adminChat .admin-page-head {
+    align-items: stretch;
+  }
+
+  #adminChat .admin-count {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    min-height: 52px;
+    border-radius: 999px;
+  }
+
+  #adminChat .admin-chat-layout {
+    flex-direction: column;
+    width: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .admin-chat-sidebar {
+    width: 100%;
+    max-height: 260px;
+    flex: 0 0 auto;
+    border-right: 0;
+    border-bottom: 1px solid rgba(80, 0, 0, 0.1);
+  }
+
+  .admin-chat-main {
+    width: 100%;
+    min-height: min(62dvh, 520px);
+  }
+
+  .admin-chat-messages {
+    min-height: 360px;
+    max-height: 58dvh;
+    padding: 18px;
+  }
+
+  .admin-chat-msg {
+    max-width: 92%;
+  }
+}
+
+@media (max-width: 560px) {
+  .admin-chat-layout {
+    border-radius: 12px;
+  }
+
+  .admin-chat-sidebar {
+    max-height: 220px;
+  }
+
+  .admin-chat-user {
+    padding: 12px 14px;
+  }
+
+  .admin-chat-messages {
+    min-height: 320px;
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .admin-chat-msg {
+    max-width: 100%;
+  }
+
+  #adminChat .chat-send {
+    flex-direction: column;
+    padding: 12px;
+  }
+
+  #adminChat .chat-send button {
+    min-height: 44px;
+  }
 }
